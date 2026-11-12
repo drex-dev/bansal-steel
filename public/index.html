@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="SteelBook: steel trading orders, vehicle-wise weighbridge tracking, stock and bill reconciliation.">
+<meta name="theme-color" content="#16232f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SteelBook">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font-size:14px;-webkit-text-size-adjust:100%}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>SteelBook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: fixed left rail (collapses to a top tab strip on phones) + scrolling work area of tables and tiles */
+:root{
+  --bg:#eceff1; --surface:#ffffff; --surface-2:#f5f7f8; --ink:#14191e; --ink-2:#47515b; --muted:#76808a;
+  --line:#dbe0e4; --line-2:#c6cdd3; --accent:#1e3b55; --accent-ink:#ffffff; --accent-soft:#e3ebf2;
+  --rail:#16232f; --rail-ink:#c9d4de; --rail-active:#ffffff;
+  --s1:#2a78d6; --s2:#eb6834;
+  --good:#0a7d0a; --good-bg:#e4f3e4; --warn:#8a5a00; --warn-bg:#fdf1d6; --bad:#b42323; --bad-bg:#fbe5e5; --info:#1f5fa8; --info-bg:#e3eefa;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111417; --surface:#1a1e22; --surface-2:#20252a; --ink:#e7eaed; --ink-2:#b2bac2; --muted:#87909a;
+  --line:#2b3137; --line-2:#3a424a; --accent:#9cc0e0; --accent-ink:#0d1a26; --accent-soft:#1f2c38;
+  --rail:#0c1015; --rail-ink:#a9b5c0; --rail-active:#ffffff;
+  --s1:#3987e5; --s2:#d95926;
+  --good:#4cc24c; --good-bg:#16301a; --warn:#f0b43a; --warn-bg:#33290f; --bad:#f07070; --bad-bg:#3a1a1a; --info:#7fb2ee; --info-bg:#172a40;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111417; --surface:#1a1e22; --surface-2:#20252a; --ink:#e7eaed; --ink-2:#b2bac2; --muted:#87909a;
+  --line:#2b3137; --line-2:#3a424a; --accent:#9cc0e0; --accent-ink:#0d1a26; --accent-soft:#1f2c38;
+  --rail:#0c1015; --rail-ink:#a9b5c0; --rail-active:#ffffff;
+  --s1:#3987e5; --s2:#d95926;
+  --good:#4cc24c; --good-bg:#16301a; --warn:#f0b43a; --warn-bg:#33290f; --bad:#f07070; --bad-bg:#3a1a1a; --info:#7fb2ee; --info-bg:#172a40;
+  color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100%}
+/* rail */
+.rail{background:var(--rail);color:var(--rail-ink);padding:18px 12px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px}
+.brand-mark{width:30px;height:30px;border-radius:4px;background:linear-gradient(135deg,#8796a3,#d3dbe2 45%,#6e7d8a);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;color:#14191e;font-size:17px}
+.brand-name{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:.02em;color:var(--rail-active);line-height:1}
+.brand-sub{font-size:11px;opacity:.75;letter-spacing:.04em}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:5px;color:var(--rail-ink);text-decoration:none;font-weight:500}
+.nav a:hover{background:rgba(255,255,255,.06)}
+.nav a.on{background:rgba(255,255,255,.1);color:var(--rail-active)}
+.nav .sec{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.55;padding:12px 10px 4px}
+.badge{font-family:var(--f-mono);font-size:11px;padding:1px 6px;border-radius:9px;background:rgba(255,255,255,.12)}
+.badge.hot{background:#c2410c;color:#fff}
+.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px;font-size:12px}
+.rail-foot label{opacity:.7;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.rail-foot select{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--rail-active);border-radius:5px;padding:6px 8px}
+.rail-foot select option{color:#111}
+.rail-foot button{background:none;border:1px dashed rgba(255,255,255,.25);color:var(--rail-ink);border-radius:5px;padding:6px 8px;cursor:pointer;text-align:left}
+/* main */
+main{min-width:0;padding-block:20px 60px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.demo-strip{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 12px;margin-bottom:18px}
+.demo-strip b{color:var(--ink)}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
+h1{font-family:var(--f-display);font-weight:700;font-size:32px;letter-spacing:.01em;margin:0;line-height:1.05;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:600;font-size:20px;letter-spacing:.02em;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:5px;padding:7px 12px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--ink-2)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.sm{padding:3px 9px;font-size:12.5px}
+.btn.ghost{background:none;border-color:transparent;color:var(--info)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:5px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 11px;cursor:pointer;font-size:13px;color:var(--ink-2)}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin-bottom:16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.tile .k{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tile .v{font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1.05;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:16px;font-weight:600;color:var(--ink-2);margin-left:3px}
+.tile .m{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .m .up{color:var(--good)} .tile .m .dn{color:var(--bad)}
+/* panels */
+.grid2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;min-width:0}
+.panel-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.panel-b{padding:14px 16px}
+.panel-b.flush{padding:0}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink-2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+/* tables */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface-2)}
+td{padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right}
+tr.click{cursor:pointer} tr.click:hover td{background:var(--surface-2)}
+.mono{font-family:var(--f-mono);font-size:12.5px}
+.plate{color:var(--ink);font-family:var(--f-mono);font-weight:600;font-size:12px;letter-spacing:.04em;border:1.5px solid var(--ink-2);border-radius:3px;padding:1px 5px;background:var(--surface);white-space:nowrap}
+.dim{color:var(--muted)}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.ok{color:var(--good);background:var(--good-bg)} .pill.warn{color:var(--warn);background:var(--warn-bg)}
+.pill.bad{color:var(--bad);background:var(--bad-bg)} .pill.info{color:var(--info);background:var(--info-bg)}
+.pill.mut{color:var(--ink-2);background:var(--surface-2)}
+.tag{font-size:11px;font-weight:600;letter-spacing:.06em;padding:1px 6px;border-radius:3px;border:1px solid var(--line-2);color:var(--ink-2)}
+.prog{display:flex;align-items:center;gap:8px;min-width:120px}
+.prog .bar{flex:1;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;border:1px solid var(--line)}
+.prog .bar i{display:block;height:100%;background:var(--s1);border-radius:3px}
+.prog span{font-size:12px;color:var(--ink-2);min-width:34px;text-align:right}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.filters input[type=search]{border:1px solid var(--line-2);background:var(--surface);border-radius:5px;padding:6px 10px;min-width:0;width:220px;max-width:100%}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+/* list items */
+.list{display:flex;flex-direction:column}
+.li{display:flex;gap:10px;align-items:flex-start;padding:10px 16px;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:0}
+.li .t{flex:1;min-width:0}
+.li .t b{font-weight:600}
+.li .t div{font-size:12.5px;color:var(--ink-2)}
+.ico{width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700}
+.ico.bad{background:var(--bad-bg);color:var(--bad)} .ico.warn{background:var(--warn-bg);color:var(--warn)} .ico.info{background:var(--info-bg);color:var(--info)}
+/* stock bars */
+.sbar{display:grid;grid-template-columns:120px minmax(0,1fr) 92px;gap:10px;align-items:center;padding:7px 0}
+.sbar .lab{font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sbar .trk{height:16px;background:var(--surface-2);border-radius:0 4px 4px 0;position:relative}
+.sbar .trk i{position:absolute;left:0;top:0;bottom:0;background:var(--s1);border-radius:0 4px 4px 0}
+.sbar .val{text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+/* stock cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:8px}
+.card.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.card h3{margin:0;font-family:var(--f-display);font-size:20px;font-weight:700}
+.kv{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.kv span:nth-child(odd){color:var(--muted)}
+.kv span:nth-child(even){text-align:right;font-weight:500}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(10,14,18,.5);display:flex;align-items:flex-start;justify-content:center;padding:5vh max(16px,env(safe-area-inset-left,0px)) 20px;z-index:50;overflow:auto}
+.modal{background:var(--surface);border-radius:8px;border:1px solid var(--line);width:100%;max-width:640px;box-shadow:0 18px 50px rgba(0,0,0,.3)}
+.modal.wide{max-width:900px}
+.modal-h{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.modal-b{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.modal-f{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--line);background:var(--surface-2);border-radius:0 0 8px 8px}
+.x{background:none;border:0;font-size:22px;cursor:pointer;color:var(--muted);line-height:1}
+.fg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f.full{grid-column:1/-1}
+.f label{font-size:12px;font-weight:600;color:var(--ink-2)}
+.f input,.f select,.f textarea{border:1px solid var(--line-2);background:var(--surface);border-radius:5px;padding:7px 9px;width:100%}
+.f .hint{font-size:11.5px;color:var(--muted)}
+.calc{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-size:13px}
+.calc .kv{font-size:13px}
+.msg{border-radius:5px;padding:8px 12px;font-size:13px}
+.msg.bad{background:var(--bad-bg);color:var(--bad)} .msg.warn{background:var(--warn-bg);color:var(--warn)} .msg.ok{background:var(--good-bg);color:var(--good)} .msg.info{background:var(--info-bg);color:var(--info)}
+.msgs{display:flex;flex-direction:column;gap:6px}
+.check{display:flex;gap:8px;align-items:center;font-size:13px}
+/* reports */
+.wa{background:#e7ddd3;border-radius:8px;padding:16px;display:flex}
+.wa-b{background:#fff;color:#111;border-radius:0 8px 8px 8px;padding:10px 12px;max-width:420px;font-size:13px;white-space:pre-wrap;box-shadow:0 1px 1px rgba(0,0,0,.12);font-family:var(--f-body)}
+:root[data-theme="dark"] .wa{background:#0b141a} :root[data-theme="dark"] .wa-b{background:#202c33;color:#e9edef}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .wa{background:#0b141a} :root:not([data-theme="light"]) .wa-b{background:#202c33;color:#e9edef}}
+pre.code{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:12px;font-family:var(--f-mono);font-size:12px;overflow:auto;max-height:420px;margin:0}
+.phase{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--warn);background:var(--warn-bg);padding:2px 8px;border-radius:3px}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:6px 9px;border-radius:5px;z-index:60;white-space:pre;font-variant-numeric:tabular-nums;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));right:max(18px,env(safe-area-inset-right,0px));background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:6px;z-index:70;font-weight:500}
+svg text{fill:var(--muted);font-family:var(--f-body);font-size:11px}
+@media (max-width:1000px){.grid2{grid-template-columns:minmax(0,1fr)}}
+/* tablet */
+@media (max-width:1100px) and (min-width:821px){.app{grid-template-columns:196px minmax(0,1fr)}.brand-sub{display:none}}
+.tabbar,.fab,.sheet{display:none}
+/* phone: top bar + bottom tab bar, tables become cards, modals become full-screen sheets */
+@media (max-width:820px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--rail)}
+  .rail{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;height:auto;flex-direction:row;justify-content:space-between;align-items:center;gap:10px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+  .rail .nav,.rail-foot label,#reset,.brand-sub{display:none}
+  .brand-name{font-size:20px}
+  .rail-foot{margin:0}
+  .rail-foot select{max-width:190px;padding:5px 6px;font-size:13px}
+  main{padding-block:14px calc(150px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  h1{font-size:28px}
+  .demo-strip{font-size:11.5px}
+  .head .btns .btn{flex:1}
+  .head .btns{width:100%}
+  .seg{max-width:100%;overflow-x:auto}
+  .seg button{white-space:nowrap;padding:8px 11px}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .tile{padding:12px}
+  .tile .v{font-size:25px}
+  .fg{grid-template-columns:minmax(0,1fr)}
+  .sbar{grid-template-columns:96px minmax(0,1fr) 64px}
+  .filters input[type=search]{width:100%}
+  input,select,textarea{font-size:16px!important}
+  .btn{padding:9px 13px}.btn.sm{padding:7px 11px;font-size:13px}
+  /* table rows -> cards */
+  table.rt thead{display:none}
+  table.rt,table.rt tbody{display:block}
+  table.rt tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;padding:12px 16px;border-bottom:1px solid var(--line)}
+  table.rt tr:last-child{border-bottom:0}
+  table.rt td{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:0;border:0;white-space:normal;text-align:left!important;min-width:0}
+  table.rt td::before{content:attr(data-label);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  table.rt td[data-label=""]::before{display:none}
+  table.rt td[data-label=""],table.rt td[colspan],table.rt td.wide{grid-column:1/-1}
+  table.rt td[data-label=""] .btn{width:100%}
+  table.rt td .prog{width:100%}
+  tr.click:hover td{background:none} tr.click:active{background:var(--surface-2)}
+  /* bottom tab bar */
+  .tabbar{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:4px max(6px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+  .tabbar a,.tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:10.5px;font-weight:500;color:var(--muted);text-decoration:none;background:none;border:0;position:relative;cursor:pointer}
+  .tabbar svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tabbar .on{color:var(--accent)}
+  .tabbar .dot{position:absolute;top:2px;left:calc(50% + 6px);background:#c2410c;color:#fff;font-size:9.5px;font-family:var(--f-mono);border-radius:8px;padding:0 4px;line-height:15px}
+  .fab{display:flex;align-items:center;gap:6px;position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:29;background:var(--accent);color:var(--accent-ink);border:0;border-radius:28px;padding:13px 18px;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer}
+  .fab[hidden]{display:none}
+  .sheet{display:block;position:fixed;inset:0;z-index:40;background:rgba(10,14,18,.45)}
+  .sheet[hidden]{display:none}
+  .sheet-b{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:14px 14px 0 0;padding:10px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column}
+  .sheet-b .grab{width:40px;height:4px;border-radius:2px;background:var(--line-2);margin:0 auto 10px}
+  .sheet-b a,.sheet-b button{display:flex;justify-content:space-between;padding:14px 4px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;color:var(--ink);text-decoration:none;font-size:15px;font-weight:500;cursor:pointer}
+  .sheet-b button.reset{color:var(--bad);border-bottom:0}
+  #toast{bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+  /* full-screen form sheets */
+  .ov{padding:0}
+  .modal,.modal.wide{max-width:100%;min-height:100%;border-radius:0;border:0;display:flex;flex-direction:column}
+  .modal form{display:flex;flex-direction:column;flex:1}
+  .modal-h{position:sticky;top:0;background:var(--surface);z-index:2;padding-top:calc(14px + env(safe-area-inset-top,0px))}
+  .modal-b{flex:1}
+  .modal-f{position:sticky;bottom:0;border-radius:0;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .modal-f .btn{flex:1}
+  .modal .tw{max-height:none!important}
+}
+@media (prefers-reduced-motion:no-preference){.modal{animation:pop .14s ease-out}@keyframes pop{from{transform:translateY(6px);opacity:.6}}}
+</style>
+</head>
+<body>
+
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand"><div class="brand-mark">SB</div><div><div class="brand-name">SteelBook</div><div class="brand-sub">Bansal Steel · Trading desk</div></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="rail-foot">
+      <label for="role">Signed in as</label>
+      <select id="role"><option value="owner">Akshay Bansal · Owner</option><option value="clerk">Ramesh · Dispatch clerk</option></select>
+      <button id="reset" type="button">Reset demo data</button>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+<nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+<button class="fab" id="fab" data-act="new-trip" type="button" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Log truck</button>
+<div class="sheet" id="sheet" hidden><div class="sheet-b" role="dialog" aria-label="More"><div class="grab"></div>
+  <a href="#purchases">Purchase orders</a><a href="#parties">Parties</a><a href="#audit">Audit log</a><a href="#reports">WhatsApp &amp; Tally preview</a><button type="button" class="reset" id="reset2">Reset demo data</button></div></div>
+<div id="tip" hidden></div>
+<div id="toast" hidden></div>
+<div id="modal-root"></div>
+
+<script>
+/* ============ utilities ============ */
+const DAY=864e5;
+const iso=d=>d.toISOString().slice(0,10);
+const TODAY=iso(new Date(Date.now()+5.5*3600e3));
+const addD=(s,n)=>iso(new Date(Date.parse(s)+n*DAY));
+const diffD=(a,b)=>Math.round((Date.parse(b)-Date.parse(a))/DAY);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const r3=n=>Math.round(n*1000)/1000;
+const MT=(n,d=1)=>(n??0).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
+const INR=n=>'₹'+Math.round(n??0).toLocaleString('en-IN');
+function INRc(n){const a=Math.abs(n),s=n<0?'−':'';if(a>=1e7)return s+'₹'+(a/1e7).toFixed(2)+' Cr';if(a>=1e5)return s+'₹'+(a/1e5).toFixed(2)+' L';return s+'₹'+Math.round(a).toLocaleString('en-IN')}
+const fd=s=>{if(!s)return'—';const d=new Date(s+'T00:00:00');return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'})};
+const fdl=s=>{if(!s)return'—';const d=new Date(s+'T00:00:00');return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})};
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const normPlate=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const fmtPlate=s=>{const m=normPlate(s).match(/^([A-Z]{2})(\d{1,2})([A-Z]{0,3})(\d{1,4})$/);return m?[m[1],m[2],m[3],m[4]].filter(Boolean).join(' '):String(s).toUpperCase()};
+const plateOK=s=>/^[A-Z]{2}\d{1,2}[A-Z]{0,3}\d{4}$/.test(normPlate(s));
+const GSTIN_RE=/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+
+/* ============ seed data ============ */
+const KEY='steelbook-demo-v1';
+function seed(){
+  const R=mulberry(20261112), rnd=(a,b)=>a+R()*(b-a), pick=a=>a[Math.floor(R()*a.length)];
+  const products=[
+    {id:'HRC',name:'HR Coil',spec:'IS 2062 E250 · 2.5–8 mm',hsn:'7208'},
+    {id:'TMT',name:'TMT Bar 12 mm',spec:'Fe 550D',hsn:'7214'},
+    {id:'BIL',name:'MS Billet',spec:'100 × 100 mm',hsn:'7207'},
+    {id:'DRI',name:'Sponge Iron',spec:'DRI lumps · Fe(M) 80%+',hsn:'7203'},
+    {id:'PIG',name:'Pig Iron',spec:'Foundry grade',hsn:'7201'}];
+  const parties=[
+    {id:'S1',type:'supplier',name:'Shivam Ispat Pvt Ltd',city:'Raigarh, CG',gstin:'22AAACS1234F1Z5',phone:'98271 40021',allow:0.30,st:'CG',fr:900},
+    {id:'S2',type:'supplier',name:'Kalinga Ferro Industries',city:'Rourkela, OD',gstin:'21AABCK5678M1Z2',phone:'94370 22815',allow:0.50,st:'OD',fr:1100},
+    {id:'S3',type:'supplier',name:'Damodar Alloys Ltd',city:'Durgapur, WB',gstin:'19AACCD9012K1Z8',phone:'98320 66104',allow:0.25,st:'WB',fr:1400},
+    {id:'S4',type:'supplier',name:'Gobindgarh Rolling Mills',city:'Mandi Gobindgarh, PB',gstin:'03AADFG3456R1Z1',phone:'98140 31977',allow:0.25,st:'PB',fr:600},
+    {id:'C1',type:'customer',name:'Ludhiana Forgings & Castings',city:'Ludhiana, PB',gstin:'03AAECL7788B1Z4',phone:'98159 20034',allow:0.20,st:'PB',fr:1200},
+    {id:'C2',type:'customer',name:'Hisar Fabricators',city:'Hisar, HR',gstin:'06AAFFH2210C1Z9',phone:'94160 55892',allow:0.25,st:'HR',fr:1000},
+    {id:'C3',type:'customer',name:'Raipur Re-Rolling Works',city:'Raipur, CG',gstin:'22AAGFR6630D1Z3',phone:'98261 77410',allow:0.50,st:'CG',fr:800},
+    {id:'C4',type:'customer',name:'Gobind Structures',city:'Jaipur, RJ',gstin:'08AAHFG4471E1Z6',phone:'98290 13358',allow:0.20,st:'RJ',fr:1300},
+    {id:'C5',type:'customer',name:'Faridabad Auto Components',city:'Faridabad, HR',gstin:'06AAICF9902G1Z0',phone:'98110 48261',allow:0.20,st:'HR',fr:1250},
+    {id:'C6',type:'customer',name:'Kanpur Wire Products',city:'Kanpur, UP',gstin:'09AAJFK3315H1Z7',phone:'94150 60927',allow:0.30,st:'UP',fr:1100}];
+  // [no,type,party,product,qty,rate,daysAgo,tol%,freight,durationDays]
+  const spec=[
+    ['PO-2601','PO','S1','HRC',1500,51800,82,2,'ex',38],
+    ['PO-2602','PO','S2','DRI',3000,26400,76,3,'ex',50],
+    ['SO-2601','SO','C2','HRC',600,55700,74,2,'ex',30],
+    ['SO-2602','SO','C3','DRI',2500,29400,71,3,'ex',55],
+    ['PO-2603','PO','S3','BIL',2000,40900,68,2,'ex',42],
+    ['SO-2603','SO','C1','BIL',1200,44200,64,2,'for',40],
+    ['PO-2604','PO','S4','TMT',800,50300,55,2,'ex',30],
+    ['SO-2604','SO','C4','TMT',450,54400,48,2,'for',35],
+    ['PO-2605','PO','S2','PIG',1200,35800,41,2,'ex',36],
+    ['SO-2605','SO','C5','HRC',900,56100,38,2,'for',40],
+    ['SO-2606','SO','C6','PIG',700,39100,35,2,'ex',38],
+    ['PO-2606','PO','S1','HRC',1000,52400,23,2,'ex',35],
+    ['SO-2607','SO','C1','BIL',1500,44600,21,2,'for',45],
+    ['PO-2607','PO','S3','BIL',1500,41300,9,2,'ex',40],
+    ['SO-2608','SO','C3','DRI',600,29800,8,3,'ex',30],
+    ['SO-2609','SO','C2','HRC',350,56600,6,2,'ex',25]];
+  const orders=spec.map(([no,type,party,product,qty,rate,ago,tol,freight,dur])=>({id:no,no,type,party,product,qty,rate,date:addD(TODAY,-ago),tol,freight,dur,status:'open',remarks:''}));
+  const drivers=['Gurpreet Singh','Raju Yadav','Sunil Kumar','Manoj Sahu','Harish Verma','Balwinder Singh','Dinesh Patel','Mohd. Irfan','Suresh Nag','Rakesh Meena','Ajay Pal','Vikram Thakur'];
+  const L='ABCDEFGHJKLMNPRSTUVWXYZ';
+  const plateFor=st=>`${st}${String(1+Math.floor(R()*39)).padStart(2,'0')}${L[Math.floor(R()*L.length)]}${L[Math.floor(R()*L.length)]}${String(1000+Math.floor(R()*8999))}`;
+  const pools={};const pool=st=>pools[st]||(pools[st]=Array.from({length:14},()=>plateFor(st)));
+  let seq=1;const trips=[];
+  const candidates=[];
+  for(const o of orders){
+    const p=parties.find(x=>x.id===o.party);
+    const st=o.type==='PO'?p.st:pick(['CG','HR','PB','CG']);
+    let cum=0;
+    for(let d=addD(o.date,2);d<=TODAY&&cum<o.qty-0.5;d=addD(d,1)){
+      const n=Math.floor(o.qty/o.dur/28+R()*0.95);
+      for(let k=0;k<n&&cum<o.qty-0.5;k++){
+        let w=r3(rnd(24,34));const rem=o.qty-cum;if(rem<=40)w=r3(Math.max(rem,6));
+        cum+=w;
+        candidates.push({o,p,date:d,w,plate:pick(pool(st))});
+      }
+    }
+  }
+  // purchases first (they create stock), then sales checked against stock
+  const mkTrip=(c)=>{
+    const {o,p,date,w}=c;
+    const transit=1+Math.floor(R()*3);
+    const t={id:'T'+String(seq++).padStart(4,'0'),orderId:o.id,date,vehicle:c.plate,driver:pick(drivers),lr:'LR'+(41000+Math.floor(R()*58999)),
+      srcWt:w,billWt:w,recvWt:null,dDate:null,status:'in_transit',freight:Math.round(w*p.fr),remark:'',resolution:null,noteNo:''};
+    const dd=addD(date,transit);
+    if(dd<=TODAY&&diffD(date,TODAY)>=1){
+      const roll=R();let shortPct;
+      if(roll<0.07)shortPct=rnd(0.7,1.5);else if(roll<0.12)shortPct=-rnd(0.05,0.15);else shortPct=rnd(0,0.19);
+      t.recvWt=r3(w*(1-shortPct/100));t.dDate=dd;t.status='delivered';
+      const excess=Math.max(0,(w-t.recvWt)-w*p.allow/100);
+      if(diffD(dd,TODAY)>10&&(excess<=0.0005||R()<0.7)){
+        t.status='reconciled';
+        if(excess>0.0005){t.resolution='note';t.noteNo=(o.type==='PO'?'DN-':'CN-')+(300+seq);}else t.resolution='within';
+      }
+    }
+    return t;
+  };
+  candidates.filter(c=>c.o.type==='PO').sort((a,b)=>a.date.localeCompare(b.date)).forEach(c=>trips.push(mkTrip(c)));
+  const used={};
+  for(const c of candidates.filter(c=>c.o.type==='SO').sort((a,b)=>a.date.localeCompare(b.date))){
+    const pid=c.o.product;
+    const recv=trips.filter(t=>t.dDate&&t.dDate<=c.date&&orders.find(o=>o.id===t.orderId).type==='PO'&&orders.find(o=>o.id===t.orderId).product===pid).reduce((s,t)=>s+t.recvWt,0);
+    if(recv-(used[pid]||0)>=c.w+5){used[pid]=(used[pid]||0)+c.w;const t=mkTrip(c);if(c.o.freight!=='for')t.freight=0;trips.push(t)}
+  }
+  trips.sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
+  // one order short-closed by the customer, to show the flow
+  const audit=[
+    {ts:addD(TODAY,-3)+' 18:42',user:'Akshay Bansal',action:'Short shipment flagged',ref:'',detail:'Shortage above allowance noticed on inbound trucks — sent to reconciliation'},
+    {ts:addD(TODAY,-1)+' 10:05',user:'Ramesh (Dispatch)',action:'Dispatch logged',ref:trips[trips.length-1].id,detail:'Entered from weighbridge slip'},
+    {ts:TODAY+' 09:12',user:'System',action:'Daily WhatsApp summary prepared',ref:'',detail:'Preview only — sending is Phase 2'}];
+  return {v:1,products,parties,orders,trips,audit};
+}
+
+let S;
+function load(){try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(d&&d.v===1)return d}}catch(e){}return null}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+S=load()||seed();
+
+const UI={role:'owner',period:'qtd',tripF:{dir:'all',status:'all',q:''},recF:'action',orderF:'open',stockSel:'HRC',party:null};
+try{const u=JSON.parse(localStorage.getItem(KEY+'-ui')||'null');if(u)Object.assign(UI,u)}catch(e){}
+const saveUI=()=>{try{localStorage.setItem(KEY+'-ui',JSON.stringify(UI))}catch(e){}};
+const money=()=>UI.role==='owner';
+
+function log(action,ref,detail){
+  const now=new Date(Date.now()+5.5*3600e3);
+  S.audit.push({ts:iso(now)+' '+now.toISOString().slice(11,16),user:UI.role==='owner'?'Akshay Bansal':'Ramesh (Dispatch)',action,ref,detail});
+}
+
+/* ============ calculation engine ============ */
+const P=id=>S.products.find(p=>p.id===id);
+const PT=id=>S.parties.find(p=>p.id===id);
+const O=id=>S.orders.find(o=>o.id===id);
+
+// shortage reconciliation for a single truck
+function recon(t){
+  if(t.recvWt==null)return null;
+  const o=O(t.orderId),p=PT(o.party);
+  const short=r3(t.billWt-t.recvWt);
+  const allow=r3(t.billWt*p.allow/100);
+  const excess=Math.max(0,r3(short-allow));
+  const amt=Math.round(excess*o.rate);
+  const pct=t.billWt?short/t.billWt*100:0;
+  return {short,allow,excess,amt,pct,allowPct:p.allow,gain:short<0};
+}
+
+function orderStats(o,trips){
+  const ts=trips.filter(t=>t.orderId===o.id);
+  const billed=r3(ts.reduce((s,t)=>s+t.billWt,0));
+  const recv=r3(ts.filter(t=>t.recvWt!=null).reduce((s,t)=>s+t.recvWt,0));
+  const transit=r3(ts.filter(t=>t.status==='in_transit').reduce((s,t)=>s+t.billWt,0));
+  const lo=o.qty*(1-o.tol/100),hi=o.qty*(1+o.tol/100);
+  const closed=o.status==='closed';
+  const pending=closed?0:Math.max(0,r3(o.qty-billed));
+  let status;
+  if(closed)status='Short-closed';else if(billed>=lo)status='Completed';else if(ts.length===0)status='Not started';else status='In progress';
+  return {trips:ts,count:ts.length,billed,recv,transit,pending,pct:Math.min(100,billed/o.qty*100),avgPerTruck:ts.length?billed/ts.length:0,
+    headroom:closed?0:r3(hi-billed),lo,hi,status,open:!closed&&billed<lo};
+}
+
+// chronological weighted-average costing; returns stock + realized profit per sales truck
+function compute(){
+  const trips=S.trips;
+  const ost={};S.orders.forEach(o=>ost[o.id]=orderStats(o,trips));
+  const inv={};S.products.forEach(p=>inv[p.id]={qty:0,val:0,avg:0,inbound:0,committed:0,ledger:[]});
+  const ev=[];
+  for(const t of trips){
+    const o=O(t.orderId);
+    if(o.type==='PO'){if(t.recvWt!=null)ev.push({d:t.dDate,k:0,t,o});else inv[o.product].inbound+=t.billWt}
+    else ev.push({d:t.date,k:1,t,o});
+  }
+  ev.sort((a,b)=>a.d.localeCompare(b.d)||a.k-b.k);
+  const tx={};
+  for(const e of ev){
+    const I=inv[e.o.product],t=e.t,o=e.o;
+    if(e.k===0){
+      const r=recon(t);const debit=r&&t.resolution!=='waived'?r.amt:0;
+      const value=t.billWt*o.rate-debit+(o.freight==='ex'?t.freight:0);
+      I.qty+=t.recvWt;I.val+=value;I.avg=I.qty>0?I.val/I.qty:I.avg;
+      I.ledger.push({d:e.d,t,o,in:t.recvWt,out:0,bal:I.qty,rate:value/t.recvWt});
+      tx[t.id]={landed:value/t.recvWt,debit};
+    }else{
+      const avg=I.qty>0?I.val/I.qty:I.avg;const cogs=t.srcWt*avg;
+      I.qty-=t.srcWt;I.val-=cogs;I.avg=avg;
+      I.ledger.push({d:e.d,t,o,in:0,out:t.srcWt,bal:I.qty,rate:avg});
+      const r=recon(t);const credit=r&&t.resolution!=='waived'?r.amt:0;
+      const rev=t.billWt*o.rate-credit;const fr=o.freight==='for'?t.freight:0;
+      tx[t.id]={cogs,avg,rev,credit,fr,profit:rev-fr-cogs,realized:t.status!=='in_transit'};
+    }
+  }
+  S.orders.forEach(o=>{if(o.type==='SO')inv[o.product].committed+=ost[o.id].pending});
+  Object.values(inv).forEach(I=>{I.qty=r3(I.qty);I.free=r3(I.qty+I.inbound-I.committed)});
+  return {ost,inv,tx};
+}
+function quarterStart(s){const y=+s.slice(0,4),m=+s.slice(5,7);const qm=m-((m-1)%3);return `${y}-${String(qm).padStart(2,'0')}-01`}
+function fyStart(s){const y=+s.slice(0,4),m=+s.slice(5,7);return `${m>=4?y:y-1}-04-01`}
+function fyLabel(s){const y=+fyStart(s).slice(0,4);return `FY ${y}–${String(y+1).slice(2)}`}
+function qLabel(s){const m=+s.slice(5,7);const q={4:1,5:1,6:1,7:2,8:2,9:2,10:3,11:3,12:3,1:4,2:4,3:4}[m];return `Q${q} ${fyLabel(s)}`}
+
+/* ============ small render helpers ============ */
+const $=id=>document.getElementById(id);
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+const typeTag=t=>`<span class="tag">${t==='SO'?'SALE':'PURCH'}</span>`;
+const plate=v=>`<span class="plate">${esc(fmtPlate(v))}</span>`;
+function tripState(t){
+  if(t.status==='in_transit')return {cls:'info',txt:'In transit'};
+  const r=recon(t);
+  if(t.status==='reconciled'){
+    if(t.resolution==='note')return {cls:'mut',txt:`${esc(t.noteNo)} ${O(t.orderId).type==='PO'?'raised':'issued'}`};
+    if(t.resolution==='waived')return {cls:'mut',txt:'Closed · waived'};
+    return {cls:'ok',txt:'Closed'};
+  }
+  if(r&&r.excess>0)return {cls:'bad',txt:'Short beyond allowance'};
+  if(r&&r.gain)return {cls:'warn',txt:'Over-weight · check'};
+  return {cls:'ok',txt:'Within allowance'};
+}
+const pill=s=>`<span class="pill ${s.cls}">${s.txt}</span>`;
+function ordPill(st){const m={'Completed':'ok','In progress':'info','Not started':'warn','Short-closed':'mut'};return `<span class="pill ${m[st]}">${st}</span>`}
+function niceMax(m){const p=Math.pow(10,Math.floor(Math.log10(m)));for(const f of [1,1.5,2,2.5,3,4,5,6,8,10])if(f*p>=m)return f*p;return 10*p}
+const fmtK=v=>v>=1000?(v/1000).toFixed(v%1000?1:0)+'k':String(Math.round(v));
+function barPath(x,y,w,h,fill){if(h<=0.5)return'';const r=Math.min(4,h);return `<path d="M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z" fill="${fill}"/>`}
+function monthChart(data){
+  const W=600,H=230,L=44,Rr=8,T=14,B=28,iw=W-L-Rr,ih=H-T-B;
+  const max=niceMax(Math.max(1,...data.flatMap(d=>[d.s,d.p])));
+  const gw=iw/data.length,bw=Math.min(36,gw*0.3);let g='';
+  for(let i=0;i<=4;i++){const y=T+ih-ih*i/4;g+=`<line x1="${L}" x2="${W-Rr}" y1="${y}" y2="${y}" stroke="${i?'var(--line)':'var(--line-2)'}" stroke-width="1"/><text x="${L-6}" y="${y+4}" text-anchor="end">${fmtK(max*i/4)}</text>`}
+  data.forEach((d,i)=>{
+    const cx=L+gw*i+gw/2,hs=ih*d.s/max,hp=ih*d.p/max;
+    g+=barPath(cx-bw-1,T+ih-hs,bw,hs,'var(--s1)')+barPath(cx+1,T+ih-hp,bw,hp,'var(--s2)');
+    if(d.s>0)g+=`<text x="${cx-1-bw/2}" y="${T+ih-hs-5}" text-anchor="middle">${fmtK(d.s)}</text>`;
+    if(d.p>0)g+=`<text x="${cx+1+bw/2}" y="${T+ih-hp-5}" text-anchor="middle">${fmtK(d.p)}</text>`;
+    g+=`<text x="${cx}" y="${H-8}" text-anchor="middle" style="fill:var(--ink-2)">${d.lab}</text>`;
+    g+=`<rect x="${L+gw*i}" y="${T}" width="${gw}" height="${ih}" fill="transparent" data-tip="${d.full}&#10;Sales      ${MT(d.s,1)} MT&#10;Purchases  ${MT(d.p,1)} MT"/>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Sales versus purchases by month, in tonnes">${g}</svg>`;
+}
+
+/* ============ views ============ */
+const NAV=[['s','Overview'],['dashboard','Dashboard'],['s','Orders'],['sales','Sales orders'],['purchases','Purchase orders'],['s','Logistics'],['trips','Vehicle trips'],['stock','Stock & ledger'],['recon','Bill reconciliation'],['s','Masters'],['parties','Parties'],['audit','Audit log'],['s','Phase 2 preview'],['reports','WhatsApp & Tally']];
+
+function vDashboard(C){
+  const from=UI.period==='mtd'?TODAY.slice(0,8)+'01':UI.period==='qtd'?quarterStart(TODAY):fyStart(TODAY);
+  const plab={mtd:'This month',qtd:qLabel(TODAY),fy:fyLabel(TODAY)}[UI.period];
+  const so=S.trips.filter(t=>t.date>=from&&O(t.orderId).type==='SO'),po=S.trips.filter(t=>t.date>=from&&O(t.orderId).type==='PO');
+  const sMT=sum(so,t=>t.billWt),sVal=sum(so,t=>t.billWt*O(t.orderId).rate),pMT=sum(po,t=>t.billWt),pVal=sum(po,t=>t.billWt*O(t.orderId).rate);
+  const real=so.filter(t=>C.tx[t.id]&&C.tx[t.id].realized),profit=sum(real,t=>C.tx[t.id].profit),realMT=sum(real,t=>t.billWt);
+  const openSO=S.orders.filter(o=>o.type==='SO'&&C.ost[o.id].open),openPO=S.orders.filter(o=>o.type==='PO'&&C.ost[o.id].open);
+  const pendSO=sum(openSO,o=>C.ost[o.id].pending),pendPO=sum(openPO,o=>C.ost[o.id].pending);
+  const inv=Object.values(C.inv),stockMT=sum(inv,i=>i.qty),stockVal=sum(inv,i=>i.qty*i.avg),inbound=sum(inv,i=>i.inbound);
+  const open=S.trips.filter(t=>t.status==='delivered'&&recon(t)&&recon(t).excess>0);
+  const claimPO=sum(open.filter(t=>O(t.orderId).type==='PO'),t=>recon(t).amt);
+  // monthly chart (last 4 months)
+  const months=[];for(let i=3;i>=0;i--){const d=new Date(TODAY.slice(0,8)+'01T00:00:00');d.setMonth(d.getMonth()-i);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');months.push({k,lab:d.toLocaleDateString('en-IN',{month:'short'}),full:d.toLocaleDateString('en-IN',{month:'long',year:'numeric'}),s:0,p:0})}
+  S.trips.forEach(t=>{const m=months.find(m=>t.date.startsWith(m.k));if(m){if(O(t.orderId).type==='SO')m.s+=t.billWt;else m.p+=t.billWt}});
+  const maxStock=Math.max(1,...inv.map(i=>i.qty));
+  const pend=S.orders.filter(o=>C.ost[o.id].open).sort((a,b)=>C.ost[b.id].pending-C.ost[a.id].pending).slice(0,7);
+  const transit=S.trips.filter(t=>t.status==='in_transit').sort((a,b)=>a.date.localeCompare(b.date));
+  const alerts=[];
+  if(open.length)alerts.push({c:'bad',i:'!',h:`${open.length} trucks short beyond allowance`,d:`${MT(sum(open,t=>recon(t).excess),3)} MT excess shortage${money()?` · ${INRc(sum(open,t=>recon(t).amt))} to claim or settle`:''}`,go:'recon'});
+  const late=transit.filter(t=>diffD(t.date,TODAY)>3);
+  if(late.length)alerts.push({c:'warn',i:'⏱',h:`${late.length} trucks on the road for more than 3 days`,d:late.slice(0,3).map(t=>fmtPlate(t.vehicle)).join(', ')+(late.length>3?'…':''),go:'trips'});
+  S.products.forEach(p=>{const I=C.inv[p.id];if(I.free<0)alerts.push({c:'warn',i:'↓',h:`${p.name}: sales commitments exceed cover`,d:`${MT(-I.free)} MT more is sold than stock + inbound. Raise a purchase order.`,go:'stock'})});
+  const unclosed=S.trips.filter(t=>t.status==='delivered'&&!(recon(t).excess>0)).length;
+  if(unclosed)alerts.push({c:'info',i:'✓',h:`${unclosed} delivered trucks ready to close`,d:'Shortage within allowance. Close them in one click on the reconciliation screen.',go:'recon'});
+  return `
+  <div class="head"><div><h1>Dashboard</h1><div class="sub">As of ${fdl(TODAY)} · sales and purchase figures for ${esc(plab)} · stock and pending are live</div></div>
+    <div class="seg" role="group" aria-label="Period">${[['mtd','Month'],['qtd','Quarter'],['fy','Financial year']].map(([k,l])=>`<button data-act="period" data-v="${k}" class="${UI.period===k?'on':''}">${l}</button>`).join('')}</div></div>
+  <div class="tiles">
+    <div class="tile"><div class="k">Sales dispatched</div><div class="v">${MT(sMT,0)}<small>MT</small></div><div class="m">${money()?INRc(sVal)+' · ':''}${so.length} trucks</div></div>
+    <div class="tile"><div class="k">Purchases billed</div><div class="v">${MT(pMT,0)}<small>MT</small></div><div class="m">${money()?INRc(pVal)+' · ':''}${po.length} trucks</div></div>
+    <div class="tile"><div class="k">Pending to dispatch</div><div class="v">${MT(pendSO,0)}<small>MT</small></div><div class="m">${openSO.length} sales orders · ${MT(pendPO,0)} MT still to receive</div></div>
+    <div class="tile"><div class="k">Stock on hand</div><div class="v">${MT(stockMT,0)}<small>MT</small></div><div class="m">${money()?INRc(stockVal)+' at landed cost · ':''}${MT(inbound,0)} MT inbound</div></div>
+    ${money()?`<div class="tile"><div class="k">Realized profit</div><div class="v">${INRc(profit)}</div><div class="m">${INR(realMT?profit/realMT:0)}/MT on ${MT(realMT,0)} MT delivered</div></div>`:''}
+    <div class="tile"><div class="k">Open shortage claims</div><div class="v">${open.length}<small>trucks</small></div><div class="m">${money()?INRc(claimPO)+' due from suppliers':MT(sum(open,t=>recon(t).excess),2)+' MT excess shortage'}</div></div>
+  </div>
+  <div class="grid2">
+    <section class="panel"><div class="panel-h"><h2>Sales vs purchases by month (MT)</h2><div class="legend"><span><i style="background:var(--s1)"></i>Sales</span><span><i style="background:var(--s2)"></i>Purchases</span></div></div><div class="panel-b">${monthChart(months)}</div></section>
+    <section class="panel"><div class="panel-h"><h2>Needs attention</h2><span class="dim">${alerts.length} items</span></div><div class="list">${alerts.length?alerts.map(a=>`<a class="li" href="#${a.go}" style="color:inherit;text-decoration:none"><span class="ico ${a.c}">${a.i}</span><div class="t"><b>${a.h}</b><div>${esc(a.d)}</div></div></a>`).join(''):'<div class="empty">Nothing needs action.</div>'}</div></section>
+  </div>
+  <div class="grid2">
+    <section class="panel"><div class="panel-h"><h2>Pending orders</h2><a class="btn sm ghost" href="#sales">All orders →</a></div><div class="panel-b flush tw"><table>
+      <thead><tr><th>Order</th><th>Party</th><th>Product</th><th class="n">Ordered</th><th class="n">Pending</th><th>Progress</th></tr></thead><tbody>
+      ${pend.map(o=>{const s=C.ost[o.id];return `<tr class="click" data-act="order" data-id="${o.id}"><td>${typeTag(o.type)} <span class="mono">${o.no}</span></td><td>${esc(PT(o.party).name)}</td><td>${esc(P(o.product).name)}</td><td class="n">${MT(o.qty,0)}</td><td class="n"><b>${MT(s.pending)}</b></td><td><div class="prog"><div class="bar"><i style="width:${s.pct}%"></i></div><span>${Math.round(s.pct)}%</span></div></td></tr>`}).join('')}
+      </tbody></table></div></section>
+    <section class="panel"><div class="panel-h"><h2>Stock by product (MT)</h2><a class="btn sm ghost" href="#stock">Ledger →</a></div><div class="panel-b">
+      ${S.products.map(p=>{const I=C.inv[p.id];return `<div class="sbar" data-tip="${esc(p.name)}&#10;On hand   ${MT(I.qty)} MT&#10;Inbound   ${MT(I.inbound)} MT&#10;Committed ${MT(I.committed)} MT${money()?`&#10;Avg cost  ${INR(I.avg)}/MT`:''}"><div class="lab">${esc(p.name)}</div><div class="trk"><i style="width:${Math.max(0,I.qty)/maxStock*100}%"></i></div><div class="val">${MT(I.qty)}</div></div>`}).join('')}
+    </div></section>
+  </div>
+  <section class="panel"><div class="panel-h"><h2>Vehicles in transit</h2><span class="dim">${transit.length} trucks · ${MT(sum(transit,t=>t.billWt))} MT</span></div><div class="panel-b flush tw"><table>
+    <thead><tr><th>Vehicle</th><th>Direction</th><th>Order</th><th>Party</th><th>Product</th><th class="n">Loaded MT</th><th>Left</th><th>On road</th><th></th></tr></thead><tbody>
+    ${transit.map(t=>{const o=O(t.orderId),dd=diffD(t.date,TODAY);return `<tr><td>${plate(t.vehicle)}</td><td>${o.type==='SO'?'Outbound':'Inbound'}</td><td class="mono">${o.no}</td><td>${esc(PT(o.party).name)}</td><td>${esc(P(o.product).name)}</td><td class="n">${MT(t.srcWt,3)}</td><td>${fd(t.date)}</td><td>${dd>3?`<span class="pill warn">${dd} days</span>`:dd+' d'}</td><td><button class="btn sm" data-act="receipt" data-id="${t.id}">Record receipt</button></td></tr>`}).join('')||'<tr><td colspan="9" class="empty">No trucks on the road.</td></tr>'}
+    </tbody></table></div></section>`;
+}
+
+function vOrders(C,type){
+  const name=type==='SO'?'Sales orders':'Purchase orders';
+  let list=S.orders.filter(o=>o.type===type);
+  if(UI.orderF==='open')list=list.filter(o=>C.ost[o.id].open);
+  if(UI.orderF==='done')list=list.filter(o=>!C.ost[o.id].open);
+  list.sort((a,b)=>b.date.localeCompare(a.date));
+  const all=S.orders.filter(o=>o.type===type);
+  const tot=sum(all.filter(o=>C.ost[o.id].open),o=>C.ost[o.id].pending);
+  return `<div class="head"><div><h1>${name}</h1><div class="sub">${all.length} orders · ${MT(tot)} MT pending ${type==='SO'?'to dispatch':'to receive'} · completion uses each order's ± tolerance</div></div>
+   <div class="btns"><button class="btn" data-act="new-trip">${type==='SO'?'Log dispatch':'Log inbound truck'}</button>${money()?`<button class="btn pri" data-act="new-order" data-v="${type}">New ${type==='SO'?'sales':'purchase'} order</button>`:''}</div></div>
+  <section class="panel"><div class="filters"><div class="seg">${[['open','Open'],['done','Completed / closed'],['all','All']].map(([k,l])=>`<button data-act="orderF" data-v="${k}" class="${UI.orderF===k?'on':''}">${l}</button>`).join('')}</div><span class="dim">Click a row for vehicle-wise detail</span></div>
+  <div class="tw"><table><thead><tr><th>Order</th><th>Date</th><th>${type==='SO'?'Customer':'Supplier'}</th><th>Product</th><th class="n">Qty MT</th>${money()?'<th class="n">Rate ₹/MT</th>':''}<th class="n">${type==='SO'?'Dispatched':'Billed in'}</th><th class="n">Pending</th><th>Progress</th><th class="n">Trucks</th><th class="n">Avg / truck</th><th>Freight</th><th>Status</th></tr></thead><tbody>
+  ${list.map(o=>{const s=C.ost[o.id];return `<tr class="click" data-act="order" data-id="${o.id}"><td class="mono">${o.no}</td><td>${fd(o.date)}</td><td>${esc(PT(o.party).name)}</td><td>${esc(P(o.product).name)}</td><td class="n">${MT(o.qty,0)} <span class="dim">±${o.tol}%</span></td>${money()?`<td class="n">${o.rate.toLocaleString('en-IN')}</td>`:''}<td class="n">${MT(s.billed)}</td><td class="n"><b>${MT(s.pending)}</b></td><td><div class="prog"><div class="bar"><i style="width:${s.pct}%"></i></div><span>${Math.round(s.pct)}%</span></div></td><td class="n">${s.count}</td><td class="n">${MT(s.avgPerTruck,2)}</td><td>${o.freight==='for'?'FOR (ours)':o.type==='PO'?'Ex-works (ours)':'Ex-yard (buyer)'}</td><td>${ordPill(s.status)}</td></tr>`}).join('')||`<tr><td colspan="13" class="empty">No orders in this view.</td></tr>`}
+  </tbody></table></div></section>`;
+}
+
+function vTrips(C){
+  const F=UI.tripF;
+  let list=S.trips.slice();
+  if(F.dir!=='all')list=list.filter(t=>O(t.orderId).type===F.dir);
+  if(F.status!=='all')list=list.filter(t=>t.status===F.status);
+  const q=F.q.trim().toUpperCase();
+  if(q)list=list.filter(t=>{const o=O(t.orderId);return normPlate(t.vehicle).includes(normPlate(q))||o.no.includes(q)||PT(o.party).name.toUpperCase().includes(q)||t.driver.toUpperCase().includes(q)||t.lr.includes(q)});
+  list.sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+  const shown=list.slice(0,150);
+  // vehicle register
+  const reg={};S.trips.forEach(t=>{const k=normPlate(t.vehicle);const r=reg[k]||(reg[k]={v:t.vehicle,n:0,mt:0,sh:0,shn:0,last:'',ex:0});r.n++;r.mt+=t.billWt;if(t.recvWt!=null){r.sh+=t.billWt-t.recvWt;r.shn+=t.billWt;if(recon(t).excess>0)r.ex++}if(t.date>r.last)r.last=t.date});
+  const regs=Object.values(reg).sort((a,b)=>b.n-a.n).slice(0,12);
+  return `<div class="head"><div><h1>Vehicle trips</h1><div class="sub">Every truck, with loading, billed and received weights · ${S.trips.length} trips recorded</div></div>
+   <div class="btns"><button class="btn pri" data-act="new-trip">Log truck</button></div></div>
+  <section class="panel" style="margin-bottom:14px"><div class="filters">
+    <div class="seg">${[['all','All'],['SO','Outbound'],['PO','Inbound']].map(([k,l])=>`<button data-act="tripdir" data-v="${k}" class="${F.dir===k?'on':''}">${l}</button>`).join('')}</div>
+    <div class="seg">${[['all','Any status'],['in_transit','In transit'],['delivered','Delivered'],['reconciled','Closed']].map(([k,l])=>`<button data-act="tripst" data-v="${k}" class="${F.status===k?'on':''}">${l}</button>`).join('')}</div>
+    <input type="search" id="tripq" placeholder="Vehicle no, order, party, driver, LR" value="${esc(F.q)}" aria-label="Search trips">
+    <span class="dim">${list.length} trips${list.length>150?' · showing latest 150':''}</span></div>
+  <div class="tw"><table><thead><tr><th>Date</th><th>Vehicle</th><th>Driver</th><th>LR / challan</th><th>Order</th><th>Party</th><th>Product</th><th class="n">Loaded</th><th class="n">Billed</th><th class="n">Received</th><th class="n">Diff MT</th><th class="n">Diff %</th><th>Status</th><th></th></tr></thead><tbody>
+  ${shown.map(t=>{const o=O(t.orderId),r=recon(t);return `<tr><td>${fd(t.date)}</td><td><a href="#trips" data-act="plate" data-v="${esc(t.vehicle)}" style="text-decoration:none">${plate(t.vehicle)}</a></td><td>${esc(t.driver)}</td><td class="mono">${esc(t.lr)}</td><td>${typeTag(o.type)} <span class="mono">${o.no}</span></td><td>${esc(PT(o.party).name)}</td><td>${esc(P(o.product).name)}</td><td class="n">${MT(t.srcWt,3)}</td><td class="n">${MT(t.billWt,3)}</td><td class="n">${t.recvWt!=null?MT(t.recvWt,3):'<span class="dim">—</span>'}</td><td class="n ${r?(r.excess>0?'neg':r.gain?'pos':''):''}">${r?(r.short>0?'−':r.short<0?'+':'')+MT(Math.abs(r.short),3):''}</td><td class="n">${r?MT(r.pct,2)+'%':''}</td><td>${pill(tripState(t))}</td><td>${tripActions(t)}</td></tr>`}).join('')||'<tr><td colspan="14" class="empty">No trips match. Clear the search or filters.</td></tr>'}
+  </tbody></table></div></section>
+  <section class="panel"><div class="panel-h"><h2>Vehicle register</h2><span class="dim">Most frequent trucks · click a plate in the table to see its trips</span></div><div class="tw"><table><thead><tr><th>Vehicle</th><th class="n">Trips</th><th class="n">MT carried</th><th class="n">Avg shortage</th><th class="n">Trips short beyond allowance</th><th>Last trip</th></tr></thead><tbody>
+  ${regs.map(r=>`<tr class="click" data-act="plate" data-v="${esc(r.v)}"><td>${plate(r.v)}</td><td class="n">${r.n}</td><td class="n">${MT(r.mt)}</td><td class="n">${r.shn?MT(r.sh/r.shn*100,2)+'%':'—'}</td><td class="n">${r.ex?`<span class="pill ${r.ex>1?'bad':'warn'}">${r.ex}</span>`:'0'}</td><td>${fd(r.last)}</td></tr>`).join('')}
+  </tbody></table></div></section>`;
+}
+function tripActions(t){
+  if(t.status==='in_transit')return `<button class="btn sm" data-act="receipt" data-id="${t.id}">Record receipt</button>`;
+  if(t.status==='delivered')return `<button class="btn sm" data-act="resolve" data-id="${t.id}">Reconcile</button>`;
+  return money()?`<button class="btn sm ghost" data-act="reopen" data-id="${t.id}">Reopen</button>`:'';
+}
+
+function vStock(C){
+  const sel=UI.stockSel,I=C.inv[sel],p=P(sel);
+  const led=I.ledger.slice().reverse().slice(0,80);
+  return `<div class="head"><div><h1>Stock & ledger</h1><div class="sub">Stock moves only from weighbridge entries: inbound at received weight, outbound at loaded weight. Cost is weighted average, landed (rate − debit notes + freight).</div></div></div>
+  <div class="cards">${S.products.map(q=>{const J=C.inv[q.id];return `<div class="card ${q.id===sel?'on':''}" data-act="stock" data-v="${q.id}" tabindex="0" role="button"><div><h3>${esc(q.name)}</h3><div class="dim" style="font-size:12px">${esc(q.spec)} · HSN ${q.hsn}</div></div>
+    <div class="kv"><span>On hand</span><span>${MT(J.qty)} MT</span>${money()?`<span>Avg landed cost</span><span>${INR(J.avg)}/MT</span><span>Stock value</span><span>${INRc(J.qty*J.avg)}</span>`:''}<span>Inbound in transit</span><span>${MT(J.inbound)} MT</span><span>Committed to sales</span><span>${MT(J.committed)} MT</span><span>Free to sell</span><span>${J.free<0?`<span class="pill bad">${MT(J.free)} MT</span>`:MT(J.free)+' MT'}</span></div></div>`}).join('')}</div>
+  <section class="panel"><div class="panel-h"><h2>${esc(p.name)} — stock ledger</h2><span class="dim">Latest ${led.length} of ${I.ledger.length} movements · balance runs oldest to newest</span></div>
+  <div class="tw"><table><thead><tr><th>Date</th><th>Movement</th><th>Order</th><th>Party</th><th>Vehicle</th><th class="n">In MT</th><th class="n">Out MT</th><th class="n">Balance MT</th>${money()?'<th class="n">Cost ₹/MT</th>':''}</tr></thead><tbody>
+  ${led.map(l=>`<tr><td>${fd(l.d)}</td><td>${l.in?'Receipt':'Dispatch'}</td><td class="mono">${l.o.no}</td><td>${esc(PT(l.o.party).name)}</td><td>${plate(l.t.vehicle)}</td><td class="n pos">${l.in?MT(l.in,3):''}</td><td class="n">${l.out?MT(l.out,3):''}</td><td class="n"><b>${MT(l.bal,3)}</b></td>${money()?`<td class="n">${INR(l.rate)}</td>`:''}</tr>`).join('')||'<tr><td colspan="9" class="empty">No movements yet.</td></tr>'}
+  </tbody></table></div></section>`;
+}
+
+function vRecon(C){
+  const weighed=S.trips.filter(t=>t.recvWt!=null);
+  const rs=weighed.map(t=>({t,r:recon(t),o:O(t.orderId)}));
+  const shortMT=sum(rs,x=>Math.max(0,x.r.short)),allowMT=sum(rs,x=>Math.min(Math.max(0,x.r.short),x.r.allow)),exMT=sum(rs,x=>x.r.excess);
+  const dn=sum(rs.filter(x=>x.o.type==='PO'&&x.t.resolution!=='waived'),x=>x.r.amt),cn=sum(rs.filter(x=>x.o.type==='SO'&&x.t.resolution!=='waived'),x=>x.r.amt);
+  let list;
+  if(UI.recF==='action')list=S.trips.filter(t=>t.status==='delivered'&&recon(t).excess>0);
+  else if(UI.recF==='close')list=S.trips.filter(t=>t.status==='delivered'&&!(recon(t).excess>0));
+  else if(UI.recF==='transit')list=S.trips.filter(t=>t.status==='in_transit');
+  else if(UI.recF==='done')list=S.trips.filter(t=>t.status==='reconciled');
+  else list=S.trips.slice();
+  list.sort((a,b)=>b.date.localeCompare(a.date));
+  const cnt={action:S.trips.filter(t=>t.status==='delivered'&&recon(t).excess>0).length,close:S.trips.filter(t=>t.status==='delivered'&&!(recon(t).excess>0)).length};
+  return `<div class="head"><div><h1>Bill reconciliation</h1><div class="sub">Shortage = billed − received weight. Each party has an agreed allowance (% of billed). Only shortage beyond it is claimed.</div></div>
+   ${cnt.close?`<div class="btns"><button class="btn" data-act="close-within">Close ${cnt.close} trucks within allowance</button></div>`:''}</div>
+  <div class="tiles">
+    <div class="tile"><div class="k">Total shortage</div><div class="v">${MT(shortMT,2)}<small>MT</small></div><div class="m">${MT(shortMT/Math.max(1,sum(weighed,t=>t.billWt))*100,3)}% of ${MT(sum(weighed,t=>t.billWt),0)} MT weighed</div></div>
+    <div class="tile"><div class="k">Absorbed in allowance</div><div class="v">${MT(allowMT,2)}<small>MT</small></div><div class="m">Normal transit loss, no claim</div></div>
+    <div class="tile"><div class="k">Beyond allowance</div><div class="v">${MT(exMT,2)}<small>MT</small></div><div class="m">${rs.filter(x=>x.r.excess>0).length} trucks</div></div>
+    ${money()?`<div class="tile"><div class="k">Debit notes on suppliers</div><div class="v">${INRc(dn)}</div><div class="m">Recovered or claimable</div></div>
+    <div class="tile"><div class="k">Credit notes to customers</div><div class="v">${INRc(cn)}</div><div class="m">Deducted from realized profit</div></div>`:''}
+  </div>
+  <section class="panel"><div class="filters"><div class="seg">${[['action',`Needs action (${cnt.action})`],['close',`Ready to close (${cnt.close})`],['transit','Awaiting receipt'],['done','Closed'],['all','All']].map(([k,l])=>`<button data-act="recF" data-v="${k}" class="${UI.recF===k?'on':''}">${l}</button>`).join('')}</div></div>
+  <div class="tw"><table><thead><tr><th>Date</th><th>Vehicle</th><th>Order</th><th>Party</th><th class="n">Billed</th><th class="n">Received</th><th class="n">Shortage</th><th class="n">%</th><th class="n">Allowance</th><th class="n">Excess</th>${money()?'<th class="n">Claim ₹</th>':''}<th>Status</th><th></th></tr></thead><tbody>
+  ${list.slice(0,150).map(t=>{const o=O(t.orderId),r=recon(t);return `<tr><td>${fd(t.date)}</td><td>${plate(t.vehicle)}</td><td>${typeTag(o.type)} <span class="mono">${o.no}</span></td><td>${esc(PT(o.party).name)}</td><td class="n">${MT(t.billWt,3)}</td><td class="n">${r?MT(t.recvWt,3):'—'}</td><td class="n">${r?MT(r.short,3):''}</td><td class="n">${r?MT(r.pct,2)+'%':''}</td><td class="n">${r?MT(r.allow,3)+` <span class="dim">(${r.allowPct}%)</span>`:''}</td><td class="n ${r&&r.excess>0?'neg':''}">${r?MT(r.excess,3):''}</td>${money()?`<td class="n">${r&&r.amt?INR(r.amt):''}</td>`:''}<td>${pill(tripState(t))}</td><td>${tripActions(t)}</td></tr>`}).join('')||'<tr><td colspan="13" class="empty">Nothing here. All caught up.</td></tr>'}
+  </tbody></table></div></section>`;
+}
+
+function vParties(C){
+  const rows=S.parties.slice().sort((a,b)=>a.type.localeCompare(b.type)||a.name.localeCompare(b.name));
+  return `<div class="head"><div><h1>Parties</h1><div class="sub">Customers and suppliers, with the shortage allowance agreed with each</div></div><div class="btns">${money()?'<button class="btn pri" data-act="new-party">Add party</button>':''}</div></div>
+  <section class="panel"><div class="tw"><table><thead><tr><th>Type</th><th>Name</th><th>City</th><th>GSTIN</th><th>Phone</th><th class="n">Allowance</th><th class="n">Open orders</th><th class="n">Pending MT</th>${money()?'<th class="n">Business (FY)</th>':''}</tr></thead><tbody>
+  ${rows.map(p=>{const os=S.orders.filter(o=>o.party===p.id);const open=os.filter(o=>C.ost[o.id].open);const biz=sum(S.trips.filter(t=>O(t.orderId).party===p.id&&t.date>=fyStart(TODAY)),t=>t.billWt*O(t.orderId).rate);
+    return `<tr class="${money()?'click':''}" ${money()?`data-act="edit-party" data-id="${p.id}"`:''}><td><span class="tag">${p.type==='customer'?'CUSTOMER':'SUPPLIER'}</span></td><td><b>${esc(p.name)}</b></td><td>${esc(p.city)}</td><td class="mono">${esc(p.gstin)}</td><td class="mono">${esc(p.phone)}</td><td class="n">${p.allow}%</td><td class="n">${open.length}</td><td class="n">${MT(sum(open,o=>C.ost[o.id].pending))}</td>${money()?`<td class="n">${INRc(biz)}</td>`:''}</tr>`}).join('')}
+  </tbody></table></div></section>`;
+}
+
+function vAudit(){
+  return `<div class="head"><div><h1>Audit log</h1><div class="sub">Every change is recorded with who made it. In production this table is append-only at the database level.</div></div></div>
+  <section class="panel"><div class="tw"><table><thead><tr><th>When</th><th>User</th><th>Action</th><th>Reference</th><th>Detail</th></tr></thead><tbody>
+  ${S.audit.slice().reverse().map(a=>`<tr><td class="mono">${esc(a.ts)}</td><td>${esc(a.user)}</td><td><b>${esc(a.action)}</b></td><td class="mono">${esc(a.ref)}</td><td style="white-space:normal;min-width:260px">${esc(a.detail)}</td></tr>`).join('')}
+  </tbody></table></div></section>`;
+}
+
+function waText(C){
+  const days=[...new Set(S.trips.map(t=>t.date))].sort();const day=days.includes(TODAY)?TODAY:days[days.length-1];
+  const tt=S.trips.filter(t=>t.date===day);const out=tt.filter(t=>O(t.orderId).type==='SO'),inn=tt.filter(t=>O(t.orderId).type==='PO');
+  const tr=S.trips.filter(t=>t.status==='in_transit');
+  const pend=S.orders.filter(o=>o.type==='SO'&&C.ost[o.id].open).sort((a,b)=>C.ost[b.id].pending-C.ost[a.id].pending).slice(0,4);
+  const shorts=S.trips.filter(t=>t.status==='delivered'&&recon(t).excess>0).slice(-3);
+  let s=`*SteelBook · Daily update*\n${fdl(day)}\n\n*Movement*\nOutbound: ${out.length} trucks · ${MT(sum(out,t=>t.srcWt))} MT\nInbound: ${inn.length} trucks · ${MT(sum(inn,t=>t.srcWt))} MT\nOn the road: ${tr.length} trucks · ${MT(sum(tr,t=>t.billWt))} MT\n\n*Top pending sales orders*\n`;
+  s+=pend.map(o=>`${o.no} ${PT(o.party).name.split(' ')[0]} · ${P(o.product).name} · ${MT(C.ost[o.id].pending)} MT`).join('\n');
+  s+=`\n\n*Stock (MT)*\n`+S.products.map(p=>`${p.name}: ${MT(C.inv[p.id].qty)}`).join('\n');
+  if(shorts.length)s+=`\n\n*Shortage alerts*\n`+shorts.map(t=>{const r=recon(t);return `${fmtPlate(t.vehicle)} · ${O(t.orderId).no} · short ${MT(r.short,3)} MT (${MT(r.pct,2)}%)`}).join('\n');
+  return s;
+}
+function xmlEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function tallyXML(t){
+  const o=O(t.orderId),p=PT(o.party),pr=P(o.product),sale=o.type==='SO';const amt=(t.billWt*o.rate).toFixed(2);
+  return `<ENVELOPE>
+  <HEADER><TALLYREQUEST>Import Data</TALLYREQUEST></HEADER>
+  <BODY><IMPORTDATA>
+    <REQUESTDESC><REPORTNAME>Vouchers</REPORTNAME>
+      <STATICVARIABLES><SVCURRENTCOMPANY>Bansal Steel</SVCURRENTCOMPANY></STATICVARIABLES>
+    </REQUESTDESC>
+    <REQUESTDATA><TALLYMESSAGE xmlns:UDF="TallyUDF">
+      <VOUCHER VCHTYPE="${sale?'Sales':'Purchase'}" ACTION="Create" REMOTEID="steelbook-${t.id}">
+        <DATE>${(t.date).replace(/-/g,'')}</DATE>
+        <VOUCHERTYPENAME>${sale?'Sales':'Purchase'}</VOUCHERTYPENAME>
+        <REFERENCE>${xmlEsc(o.no)}/${xmlEsc(t.lr)}</REFERENCE>
+        <PARTYLEDGERNAME>${xmlEsc(p.name)}</PARTYLEDGERNAME>
+        <NARRATION>Vehicle ${xmlEsc(fmtPlate(t.vehicle))}, LR ${xmlEsc(t.lr)}, loaded ${t.srcWt.toFixed(3)} MT</NARRATION>
+        <LEDGERENTRIES.LIST>
+          <LEDGERNAME>${xmlEsc(p.name)}</LEDGERNAME>
+          <ISDEEMEDPOSITIVE>${sale?'Yes':'No'}</ISDEEMEDPOSITIVE>
+          <AMOUNT>${sale?'-':''}${amt}</AMOUNT>
+        </LEDGERENTRIES.LIST>
+        <ALLINVENTORYENTRIES.LIST>
+          <STOCKITEMNAME>${xmlEsc(pr.name)}</STOCKITEMNAME>
+          <ISDEEMEDPOSITIVE>${sale?'No':'Yes'}</ISDEEMEDPOSITIVE>
+          <RATE>${o.rate.toFixed(2)}/MT</RATE>
+          <ACTUALQTY> ${t.billWt.toFixed(3)} MT</ACTUALQTY>
+          <BILLEDQTY> ${t.billWt.toFixed(3)} MT</BILLEDQTY>
+          <AMOUNT>${sale?'':'-'}${amt}</AMOUNT>
+          <ACCOUNTINGALLOCATIONS.LIST>
+            <LEDGERNAME>${sale?'Sales - Steel (Local/Interstate)':'Purchase - Steel'}</LEDGERNAME>
+            <AMOUNT>${sale?'':'-'}${amt}</AMOUNT>
+          </ACCOUNTINGALLOCATIONS.LIST>
+        </ALLINVENTORYENTRIES.LIST>
+        <!-- GST ledgers (CGST/SGST or IGST) added from party state code in Phase 2 -->
+      </VOUCHER>
+    </TALLYMESSAGE></REQUESTDATA>
+  </IMPORTDATA></BODY>
+</ENVELOPE>`;
+}
+function vReports(C){
+  const cands=S.trips.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,40);
+  if(!UI.tallyT||!S.trips.find(t=>t.id===UI.tallyT))UI.tallyT=cands[0]&&cands[0].id;
+  const t=S.trips.find(x=>x.id===UI.tallyT);
+  return `<div class="head"><div><h1>WhatsApp & Tally</h1><div class="sub">Previews of the Phase 2 integrations, generated from the live data in this demo. Nothing is sent from here.</div></div></div>
+  <div class="grid2">
+    <section class="panel"><div class="panel-h"><h2>Daily WhatsApp summary</h2><span class="phase">Phase 2</span></div><div class="panel-b" style="display:flex;flex-direction:column;gap:12px">
+      <div class="wa"><div class="wa-b" id="wa-text">${esc(waText(C))}</div></div>
+      <div class="btns"><button class="btn" data-act="copy" data-v="wa-text">Copy message</button></div>
+      <div class="dim" style="font-size:12.5px">Production: sent at 7 pm via the WhatsApp Business Cloud API using a pre-approved template, to the owner and a "Dispatch" group. Alerts go out instantly when a truck is short beyond allowance or on the road more than 3 days.</div>
+    </div></section>
+    <section class="panel"><div class="panel-h"><h2>Tally voucher</h2><span class="phase">Phase 2</span></div><div class="panel-b" style="display:flex;flex-direction:column;gap:12px">
+      <div class="f"><label for="tally-sel">Trip</label><select id="tally-sel">${cands.map(c=>`<option value="${c.id}" ${c.id===UI.tallyT?'selected':''}>${fd(c.date)} · ${fmtPlate(c.vehicle)} · ${O(c.orderId).no} · ${MT(c.billWt,3)} MT</option>`).join('')}</select></div>
+      <pre class="code" id="tally-xml">${esc(t?tallyXML(t):'')}</pre>
+      <div class="btns"><button class="btn" data-act="copy" data-v="tally-xml">Copy XML</button></div>
+      <div class="dim" style="font-size:12.5px">Production: a small sync agent on the office PC posts vouchers to TallyPrime (XML over port 9000). REMOTEID keeps each push idempotent, so a retry never creates a duplicate voucher. Debit/credit notes from reconciliation sync the same way.</div>
+    </div></section>
+  </div>`;
+}
+
+/* ============ modals & forms ============ */
+const root=$('modal-root');
+function modal(title,body,foot,wide){
+  root.innerHTML=`<div class="ov" data-ov><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="modal-h"><h2>${esc(title)}</h2><button class="x" data-close aria-label="Close">×</button></div><form id="mf" novalidate><div class="modal-b">${body}</div>${foot?`<div class="modal-f">${foot}</div>`:''}</form></div></div>`;
+  const first=root.querySelector('input,select,textarea');if(first)setTimeout(()=>first.focus(),30);
+  cardify(root);
+  return $('mf');
+}
+const closeModal=()=>{root.innerHTML=''};
+const v=id=>{const e=$(id);return e?e.value:''};
+const nv=id=>{const x=parseFloat(v(id));return isNaN(x)?null:x};
+const msgs=list=>list.map(m=>`<div class="msg ${m[0]}">${m[1]}</div>`).join('');
+function bindForm(form,update,submit){
+  const run=()=>{const r=update();$('m-out').innerHTML=r.html;$('m-msgs').innerHTML=msgs(r.msgs);$('m-save').disabled=r.msgs.some(m=>m[0]==='bad');return r};
+  form.addEventListener('input',run);form.addEventListener('change',run);
+  form.addEventListener('submit',e=>{e.preventDefault();const r=run();if(r.msgs.some(m=>m[0]==='bad'))return;$('m-save').disabled=true;submit(r);});
+  run();
+}
+const footSave=label=>`<button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn pri" id="m-save">${label}</button>`;
+
+function formTrip(orderId){
+  const C=compute();
+  const opts=t=>S.orders.filter(o=>o.type===t&&C.ost[o.id].open).map(o=>`<option value="${o.id}" ${o.id===orderId?'selected':''}>${o.no} · ${esc(PT(o.party).name)} · ${esc(P(o.product).name)} · ${MT(C.ost[o.id].pending)} MT pending</option>`).join('');
+  const f=modal('Log truck',`
+    <div class="fg">
+      <div class="f full"><label for="t-order">Order</label><select id="t-order"><option value="">Choose an open order…</option><optgroup label="Sales (outbound from yard)">${opts('SO')}</optgroup><optgroup label="Purchase (inbound to yard)">${opts('PO')}</optgroup></select></div>
+      <div class="f"><label for="t-veh">Vehicle number</label><input id="t-veh" placeholder="CG 04 AB 1234" autocomplete="off"></div>
+      <div class="f"><label for="t-date">Loading date</label><input id="t-date" type="date" value="${TODAY}" max="${TODAY}"></div>
+      <div class="f"><label for="t-drv">Driver</label><input id="t-drv" placeholder="Name"></div>
+      <div class="f"><label for="t-lr">LR / challan no.</label><input id="t-lr" placeholder="LR41234"></div>
+      <div class="f"><label for="t-src">Loaded weight (MT)</label><input id="t-src" type="number" step="0.001" inputmode="decimal" placeholder="28.450"><span class="hint">Net weight from the loading weighbridge slip, 3 decimals (kg)</span></div>
+      <div class="f"><label for="t-bill">Billed weight (MT)</label><input id="t-bill" type="number" step="0.001" inputmode="decimal"><span class="hint">Follows loaded weight. Change only if invoiced on theoretical weight.</span></div>
+      <div class="f"><label for="t-fr">Freight paid by us (₹)</label><input id="t-fr" type="number" step="1" placeholder="0"></div>
+      <div class="f"><label for="t-rem">Remark</label><input id="t-rem" placeholder="Optional"></div>
+      <label class="check f full" id="t-dupwrap" hidden><input type="checkbox" id="t-dup"> Yes, this is a separate trip by the same truck today</label>
+    </div>
+    <div class="calc" id="m-out"></div><div class="msgs" id="m-msgs"></div>`,footSave('Save truck'));
+  let billTouched=false,frTouched=false;
+  $('t-bill').addEventListener('input',()=>billTouched=true);$('t-fr').addEventListener('input',()=>frTouched=true);
+  $('t-veh').addEventListener('blur',e=>{if(plateOK(e.target.value))e.target.value=fmtPlate(e.target.value)});
+  bindForm(f,()=>{
+    const m=[];const o=O(v('t-order'));const src=nv('t-src');
+    if(!billTouched)$('t-bill').value=src!=null?src:'';
+    const bill=nv('t-bill');
+    if(!o)return {html:'<span class="dim">Pick an order to see pending quantity, tolerance and stock.</span>',msgs:[['bad','Choose an order.']]};
+    const s=C.ost[o.id],pt=PT(o.party),pays=(o.type==='PO'&&o.freight==='ex')||(o.type==='SO'&&o.freight==='for');
+    if(!frTouched)$('t-fr').value=pays&&src?Math.round(src*pt.fr):0;
+    const veh=v('t-veh'),date=v('t-date');
+    if(!veh)m.push(['bad','Enter the vehicle number.']);else if(!plateOK(veh))m.push(['bad','Vehicle number should look like CG 04 AB 1234 (state, RTO, series, 4 digits).']);
+    if(!date)m.push(['bad','Enter the loading date.']);else{if(date>TODAY)m.push(['bad','Loading date cannot be in the future.']);if(date<o.date)m.push(['bad',`Loading date is before the order date (${fdl(o.date)}).`])}
+    if(src==null)m.push(['bad','Enter the loaded weight.']);else if(src<=0)m.push(['bad','Loaded weight must be more than zero.']);else if(src>60)m.push(['bad','More than 60 MT on one truck. Check the weighbridge slip (did you enter kg?).']);else if(src>42)m.push(['warn','Above a typical 40 MT trailer payload. Confirm the slip.']);
+    if(bill!=null&&src&&Math.abs(bill-src)/src>0.02)m.push(['warn',`Billed weight differs from loaded weight by ${MT((bill-src)/src*100,2)}%.`]);
+    const after=bill!=null?r3(s.billed+bill):s.billed;
+    if(bill!=null&&after>s.hi)m.push(['bad',`This truck takes the order to ${MT(after,3)} MT, above the ${MT(s.hi,3)} MT limit (${o.qty} MT + ${o.tol}%). Amend the order or log against another one.`]);
+    else if(bill!=null&&after>o.qty)m.push(['info',`Over-supply of ${MT(after-o.qty,3)} MT is within the ${o.tol}% tolerance.`]);
+    const I=C.inv[o.product];
+    if(o.type==='SO'&&src!=null&&src>I.qty)m.push(['bad',`Only ${MT(I.qty,3)} MT of ${esc(P(o.product).name)} is in stock. Receive the inbound trucks first.`]);
+    const dup=S.trips.some(t=>t.orderId===o.id&&t.date===date&&normPlate(t.vehicle)===normPlate(veh));
+    $('t-dupwrap').hidden=!dup;
+    if(dup&&!$('t-dup').checked)m.push(['bad','This vehicle is already logged on this order for this date. Tick the box if it is a second trip.']);
+    const html=`<div class="kv"><span>Order</span><span>${o.no} · ${MT(o.qty,0)} MT ±${o.tol}%</span><span>${o.type==='SO'?'Dispatched so far':'Billed in so far'}</span><span>${MT(s.billed,3)} MT in ${s.count} trucks</span><span>Pending before this truck</span><span>${MT(s.pending,3)} MT</span><span>Pending after this truck</span><span><b>${MT(Math.max(0,o.qty-after),3)} MT</b></span>${o.type==='SO'?`<span>Stock on hand</span><span>${MT(I.qty,3)} MT</span>`:''}<span>Party allowance</span><span>${pt.allow}% shortage</span></div>`;
+    return {html,msgs:m,o,src,bill};
+  },r=>{
+    const t={id:'T'+String(Math.max(...S.trips.map(t=>+t.id.slice(1)))+1).padStart(4,'0'),orderId:r.o.id,date:v('t-date'),vehicle:normPlate(v('t-veh')),driver:v('t-drv')||'—',lr:v('t-lr')||'—',srcWt:r3(r.src),billWt:r3(r.bill),recvWt:null,dDate:null,status:'in_transit',freight:Math.round(nv('t-fr')||0),remark:v('t-rem'),resolution:null,noteNo:''};
+    S.trips.push(t);log(r.o.type==='SO'?'Dispatch logged':'Inbound truck logged',t.id,`${fmtPlate(t.vehicle)} · ${r.o.no} · ${MT(t.srcWt,3)} MT loaded`);
+    done(`Truck ${fmtPlate(t.vehicle)} logged · ${MT(t.srcWt,3)} MT`);
+  });
+}
+
+function formReceipt(id){
+  const t=S.trips.find(x=>x.id===id),o=O(t.orderId),p=PT(o.party);
+  const f=modal(`Record receipt · ${fmtPlate(t.vehicle)}`,`
+    <div class="kv"><span>Order</span><span>${o.no} · ${esc(p.name)}</span><span>Product</span><span>${esc(P(o.product).name)}</span><span>Loaded / billed</span><span>${MT(t.srcWt,3)} / ${MT(t.billWt,3)} MT on ${fdl(t.date)}</span></div>
+    <div class="fg">
+      <div class="f"><label for="r-wt">Received weight (MT)</label><input id="r-wt" type="number" step="0.001" inputmode="decimal"><span class="hint">${o.type==='PO'?'Our weighbridge at the yard':'From the customer\'s weighbridge slip / GRN'}</span></div>
+      <div class="f"><label for="r-date">Received on</label><input id="r-date" type="date" value="${TODAY}" min="${t.date}" max="${TODAY}"></div>
+      <div class="f full"><label for="r-rem">Remark</label><input id="r-rem" placeholder="Required if the difference is over 5%"></div>
+    </div>
+    <div class="calc" id="m-out"></div><div class="msgs" id="m-msgs"></div>`,footSave('Save receipt'));
+  bindForm(f,()=>{
+    const m=[],w=nv('r-wt'),d=v('r-date');
+    if(w==null||w<=0){m.push(['bad','Enter the received weight.']);return {html:'<span class="dim">The shortage and claim are worked out as you type.</span>',msgs:m}}
+    if(!d)m.push(['bad','Enter the date received.']);else{if(d<t.date)m.push(['bad','Received date is before the loading date.']);if(d>TODAY)m.push(['bad','Received date cannot be in the future.'])}
+    const short=r3(t.billWt-w),pct=short/t.billWt*100,allow=r3(t.billWt*p.allow/100),ex=Math.max(0,r3(short-allow)),amt=Math.round(ex*o.rate);
+    if(Math.abs(pct)>5&&!v('r-rem').trim())m.push(['bad',`Difference of ${MT(pct,2)}% is unusual. Add a remark (e.g. part unloaded, wrong slip).`]);
+    if(short<0)m.push(['warn','Received more than billed. No adjustment, but the truck is flagged for a weighbridge check.']);
+    else if(ex>0)m.push(['warn',`Shortage is ${MT(ex,3)} MT beyond the ${p.allow}% allowance. It goes to reconciliation${money()?` for a ${o.type==='PO'?'debit note of':'possible credit note of'} ${INR(amt)}`:''}.`]);
+    else m.push(['ok','Within allowance. The truck closes automatically.']);
+    const html=`<div class="kv"><span>Shortage</span><span>${MT(short,3)} MT (${MT(pct,2)}%)</span><span>Allowance ${p.allow}% of billed</span><span>${MT(allow,3)} MT</span><span>Beyond allowance</span><span class="${ex>0?'neg':''}"><b>${MT(ex,3)} MT</b></span>${money()?`<span>${o.type==='PO'?'Claim on supplier':'Exposure to customer'}</span><span>${INR(amt)} @ ${o.rate.toLocaleString('en-IN')}/MT</span>`:''}</div>`;
+    return {html,msgs:m,w,d,ex};
+  },r=>{
+    t.recvWt=r3(r.w);t.dDate=r.d;t.remark=v('r-rem');t.status='delivered';
+    if(r.ex<=0&&t.recvWt<=t.billWt){t.status='reconciled';t.resolution='within'}
+    log('Receipt recorded',t.id,`${fmtPlate(t.vehicle)} received ${MT(t.recvWt,3)} MT against ${MT(t.billWt,3)} billed${t.status==='reconciled'?' · auto-closed within allowance':''}`);
+    done(t.status==='reconciled'?'Receipt saved · closed within allowance':'Receipt saved · sent to reconciliation');
+  });
+}
+
+function formResolve(id){
+  const t=S.trips.find(x=>x.id===id),o=O(t.orderId),p=PT(o.party),r=recon(t),po=o.type==='PO';
+  const f=modal(`Reconcile · ${fmtPlate(t.vehicle)}`,`
+    <div class="calc"><div class="kv"><span>Order</span><span>${o.no} · ${esc(p.name)}</span><span>Billed / received</span><span>${MT(t.billWt,3)} / ${MT(t.recvWt,3)} MT</span><span>Shortage</span><span>${MT(r.short,3)} MT (${MT(r.pct,2)}%)</span><span>Allowance ${p.allow}%</span><span>${MT(r.allow,3)} MT</span><span>Beyond allowance</span><span><b>${MT(r.excess,3)} MT</b></span>${money()?`<span>Value</span><span><b>${INR(r.amt)}</b></span>`:''}</div></div>
+    ${r.excess>0?`<div class="f"><label for="z-res">Outcome</label><select id="z-res"><option value="note">${po?'Raise debit note on supplier':'Issue credit note to customer'}</option><option value="waived">${po?'Absorb the loss (no claim)':'Customer accepted billed weight'}</option></select></div>
+    <div class="f"><label for="z-no">${po?'Debit':'Credit'} note no.</label><input id="z-no" placeholder="${po?'DN-':'CN-'}${400+S.trips.length}"></div>`:'<input type="hidden" id="z-res" value="within">'}
+    <div id="m-out"></div><div class="msgs" id="m-msgs"></div>`,footSave('Close truck'));
+  bindForm(f,()=>{
+    const m=[],res=v('z-res');
+    if(res==='note'&&!v('z-no').trim())m.push(['bad','Enter the note number.']);
+    if(money()&&r.excess>0)m.push(['info',res==='note'?(po?`Landed cost reduces by ${INR(r.amt)}.`:`Realized profit reduces by ${INR(r.amt)}.`):(po?`Loss of ${INR(r.amt)} stays in landed cost.`:`No deduction — full billed value counts as revenue.`)]);
+    return {html:'',msgs:m,res};
+  },x=>{
+    t.status='reconciled';t.resolution=x.res;t.noteNo=x.res==='note'?v('z-no').trim():'';
+    log('Truck reconciled',t.id,x.res==='note'?`${t.noteNo} for ${MT(r.excess,3)} MT`:x.res==='waived'?'Shortage waived':'Within allowance');
+    done('Truck closed');
+  });
+}
+
+function formReopen(id){
+  const t=S.trips.find(x=>x.id===id);
+  const f=modal(`Reopen · ${fmtPlate(t.vehicle)}`,`<div class="msg warn">Closed trucks are locked. Reopening is logged with your name and reason, and any note already raised must be reversed in Tally.</div>
+    <div class="f"><label for="o-why">Reason</label><textarea id="o-why" rows="3"></textarea></div><div id="m-out"></div><div class="msgs" id="m-msgs"></div>`,footSave('Reopen'));
+  bindForm(f,()=>({html:'',msgs:v('o-why').trim().length<5?[['bad','Give a reason (at least 5 characters).']]:[]}),()=>{
+    const prev=t.noteNo;t.status='delivered';t.resolution=null;t.noteNo='';
+    log('Truck reopened',t.id,`Reason: ${v('o-why').trim()}${prev?` · previous note ${prev}`:''}`);done('Truck reopened');
+  });
+}
+
+function formOrder(type){
+  const C=compute();
+  const f=modal(type==='SO'?'New sales order':'New purchase order',`
+    <div class="fg">
+      <div class="f full"><label for="n-party">${type==='SO'?'Customer':'Supplier'}</label><select id="n-party"><option value="">Choose…</option>${S.parties.filter(p=>p.type===(type==='SO'?'customer':'supplier')).map(p=>`<option value="${p.id}">${esc(p.name)} · ${esc(p.city)}</option>`).join('')}</select></div>
+      <div class="f"><label for="n-prod">Product</label><select id="n-prod">${S.products.map(p=>`<option value="${p.id}">${esc(p.name)} · ${esc(p.spec)}</option>`).join('')}</select></div>
+      <div class="f"><label for="n-date">Order date</label><input id="n-date" type="date" value="${TODAY}"></div>
+      <div class="f"><label for="n-qty">Quantity (MT)</label><input id="n-qty" type="number" step="0.001" placeholder="500"></div>
+      <div class="f"><label for="n-rate">Rate (₹/MT, ex-GST)</label><input id="n-rate" type="number" step="1"></div>
+      <div class="f"><label for="n-tol">Tolerance ±%</label><input id="n-tol" type="number" step="0.5" value="2"></div>
+      <div class="f"><label for="n-fr">Freight</label><select id="n-fr">${type==='SO'?'<option value="ex">Ex-yard (buyer pays)</option><option value="for">FOR destination (we pay)</option>':'<option value="ex">Ex-works (we pay)</option><option value="for">FOR our yard (supplier pays)</option>'}</select></div>
+    </div><div class="calc" id="m-out"></div><div class="msgs" id="m-msgs"></div>`,footSave('Create order'));
+  bindForm(f,()=>{
+    const m=[],q=nv('n-qty'),rate=nv('n-rate'),tol=nv('n-tol'),pid=v('n-prod'),I=C.inv[pid];
+    if(!v('n-party'))m.push(['bad',`Choose a ${type==='SO'?'customer':'supplier'}.`]);
+    if(q==null||q<=0)m.push(['bad','Enter the quantity.']);else if(q<100)m.push(['warn','Below the usual 100 MT lot size.']);else if(q>3000)m.push(['warn','Above 3,000 MT. Double-check the quantity.']);
+    if(rate==null||rate<=0)m.push(['bad','Enter the rate per MT.']);else if(I.avg&&Math.abs(rate-I.avg)/I.avg>0.25)m.push(['warn',`Rate is more than 25% away from the current landed cost (${INR(I.avg)}/MT).`]);
+    if(tol==null||tol<0||tol>10)m.push(['bad','Tolerance must be between 0 and 10%.']);
+    if(type==='SO'&&q>0&&q>I.free)m.push(['warn',`Only ${MT(Math.max(0,I.free))} MT is free to sell (stock + inbound − committed). Buy ${MT(q-Math.max(0,I.free))} MT to cover this order.`]);
+    const margin=type==='SO'&&rate&&I.avg?rate-I.avg:null;
+    const html=`<div class="kv"><span>Free to sell now</span><span>${MT(I.free)} MT</span><span>Avg landed cost</span><span>${INR(I.avg)}/MT</span>${margin!=null?`<span>Expected margin</span><span class="${margin<0?'neg':'pos'}"><b>${INR(margin)}/MT${q?` · ${INRc(margin*q)} on order`:''}</b></span>`:''}${q&&rate?`<span>Order value</span><span>${INRc(q*rate)} ex-GST</span>`:''}</div>`;
+    return {html,msgs:m,q,rate,tol};
+  },r=>{
+    const nums=S.orders.filter(o=>o.type===type).map(o=>+o.no.split('-')[1]);const no=`${type}-${Math.max(...nums)+1}`;
+    const o={id:no,no,type,party:v('n-party'),product:v('n-prod'),qty:r3(r.q),rate:Math.round(r.rate),date:v('n-date')||TODAY,tol:r.tol,freight:v('n-fr'),status:'open',remarks:''};
+    S.orders.push(o);log('Order created',no,`${PT(o.party).name} · ${P(o.product).name} · ${MT(o.qty,0)} MT @ ${INR(o.rate)}`);
+    done(`${no} created`);location.hash=type==='SO'?'sales':'purchases';
+  });
+}
+
+function orderDetail(id){
+  const C=compute(),o=O(id),s=C.ost[id],p=PT(o.party);
+  const prof=o.type==='SO'?sum(s.trips.filter(t=>C.tx[t.id]&&C.tx[t.id].realized),t=>C.tx[t.id].profit):null;
+  const sh=s.trips.filter(t=>t.recvWt!=null);const shortMT=sum(sh,t=>t.billWt-t.recvWt);
+  modal(`${o.no} · ${p.name}`,`
+    <div class="tiles" style="margin:0">
+      <div class="tile"><div class="k">Ordered</div><div class="v">${MT(o.qty,0)}<small>MT</small></div><div class="m">±${o.tol}% · ${money()?INR(o.rate)+'/MT':''}</div></div>
+      <div class="tile"><div class="k">${o.type==='SO'?'Dispatched':'Billed in'}</div><div class="v">${MT(s.billed)}<small>MT</small></div><div class="m">${s.count} trucks · avg ${MT(s.avgPerTruck,2)} MT</div></div>
+      <div class="tile"><div class="k">Pending</div><div class="v">${MT(s.pending)}<small>MT</small></div><div class="m">${ordPill(s.status)}</div></div>
+      <div class="tile"><div class="k">Net shortage</div><div class="v">${MT(shortMT,2)}<small>MT</small></div><div class="m">${sh.length?MT(shortMT/sum(sh,t=>t.billWt)*100,2):'0.00'}% of weighed</div></div>
+      ${money()&&prof!=null?`<div class="tile"><div class="k">Realized profit</div><div class="v">${INRc(prof)}</div><div class="m">After shortages and freight</div></div>`:''}
+    </div>
+    <div class="dim">${esc(P(o.product).name)} · ${esc(P(o.product).spec)} · ordered ${fdl(o.date)}${o.remarks?' · '+esc(o.remarks):''}</div>
+    <div class="tw" style="border:1px solid var(--line);border-radius:6px;max-height:340px;overflow:auto"><table><thead><tr><th>Date</th><th>Vehicle</th><th>Driver</th><th class="n">Loaded</th><th class="n">Billed</th><th class="n">Received</th><th class="n">Short %</th>${money()&&o.type==='SO'?'<th class="n">Profit</th>':''}<th>Status</th></tr></thead><tbody>
+    ${s.trips.slice().reverse().map(t=>{const r=recon(t);return `<tr><td>${fd(t.date)}</td><td>${plate(t.vehicle)}</td><td>${esc(t.driver)}</td><td class="n">${MT(t.srcWt,3)}</td><td class="n">${MT(t.billWt,3)}</td><td class="n">${r?MT(t.recvWt,3):'—'}</td><td class="n">${r?MT(r.pct,2):''}</td>${money()&&o.type==='SO'?`<td class="n">${C.tx[t.id]?INR(C.tx[t.id].profit):''}</td>`:''}<td>${pill(tripState(t))}</td></tr>`}).join('')||'<tr><td colspan="9" class="empty">No trucks yet.</td></tr>'}
+    </tbody></table></div>
+    <div id="sc-box"></div>`,
+    `${s.open&&money()?`<button type="button" class="btn" data-act="short-close" data-id="${o.id}">Short-close order</button>`:''}${s.open?`<button type="button" class="btn pri" data-act="new-trip" data-id="${o.id}">Log truck on this order</button>`:''}<button type="button" class="btn" data-close>Close</button>`,true);
+}
+function formShortClose(id){
+  const o=O(id),s=compute().ost[id];
+  const f=modal(`Short-close ${o.no}`,`<div class="msg info">${MT(s.pending,3)} MT is still pending. Short-closing sets pending to zero, releases committed stock and is logged.</div>
+   <div class="f"><label for="sc-why">Reason</label><textarea id="sc-why" rows="3" placeholder="e.g. Customer cancelled balance, rate revised"></textarea></div><div id="m-out"></div><div class="msgs" id="m-msgs"></div>`,footSave('Short-close'));
+  bindForm(f,()=>({html:'',msgs:v('sc-why').trim().length<5?[['bad','Give a reason (at least 5 characters).']]:[]}),()=>{
+    o.status='closed';o.remarks='Short-closed: '+v('sc-why').trim();log('Order short-closed',o.no,`${MT(s.pending,3)} MT balance cancelled · ${v('sc-why').trim()}`);done(`${o.no} short-closed`);
+  });
+}
+function formParty(id){
+  const p=id?PT(id):null;
+  const f=modal(p?`Edit ${p.name}`:'Add party',`<div class="fg">
+    <div class="f full"><label for="p-name">Name</label><input id="p-name" value="${esc(p?p.name:'')}"></div>
+    <div class="f"><label for="p-type">Type</label><select id="p-type" ${p?'disabled':''}><option value="customer" ${p&&p.type==='customer'?'selected':''}>Customer</option><option value="supplier" ${p&&p.type==='supplier'?'selected':''}>Supplier</option></select></div>
+    <div class="f"><label for="p-city">City, state</label><input id="p-city" value="${esc(p?p.city:'')}"></div>
+    <div class="f"><label for="p-gst">GSTIN</label><input id="p-gst" value="${esc(p?p.gstin:'')}" maxlength="15" style="text-transform:uppercase"></div>
+    <div class="f"><label for="p-ph">WhatsApp number</label><input id="p-ph" value="${esc(p?p.phone:'')}"></div>
+    <div class="f"><label for="p-al">Shortage allowance %</label><input id="p-al" type="number" step="0.05" value="${p?p.allow:0.25}"><span class="hint">Agreed transit loss, as % of billed weight</span></div>
+    <div class="f"><label for="p-fr">Typical freight ₹/MT</label><input id="p-fr" type="number" step="10" value="${p?p.fr:1000}"></div>
+  </div><div id="m-out"></div><div class="msgs" id="m-msgs"></div>`,footSave(p?'Save changes':'Add party'));
+  bindForm(f,()=>{
+    const m=[],g=v('p-gst').trim().toUpperCase(),al=nv('p-al');
+    if(!v('p-name').trim())m.push(['bad','Enter the party name.']);
+    if(g&&!GSTIN_RE.test(g))m.push(['bad','GSTIN should be 15 characters, like 22AAACS1234F1Z5.']);
+    if(g&&S.parties.some(x=>x.gstin===g&&x.id!==id))m.push(['bad','Another party already has this GSTIN.']);
+    if(al==null||al<0||al>2)m.push(['bad','Allowance must be between 0 and 2%.']);
+    if(p&&al!=null&&al!==p.allow)m.push(['info','New allowance applies to trucks not yet closed. Closed trucks keep their result.']);
+    return {html:'',msgs:m};
+  },()=>{
+    const d={name:v('p-name').trim(),city:v('p-city').trim(),gstin:v('p-gst').trim().toUpperCase(),phone:v('p-ph').trim(),allow:nv('p-al'),fr:nv('p-fr')||0};
+    if(p){Object.assign(p,d);log('Party updated',p.name,`Allowance ${p.allow}%`)}
+    else{const type=v('p-type');const n=S.parties.filter(x=>x.type===type).length+1;const np={id:(type==='customer'?'C':'S')+n+'x',type,st:d.gstin.slice(0,2),...d};S.parties.push(np);log('Party added',np.name,type)}
+    done(p?'Party saved':'Party added');
+  });
+}
+
+/* ============ app shell ============ */
+const ICON={"home": "<path d=\"M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z\"/>", "doc": "<path d=\"M6 3h9l4 4v14H6z\"/><path d=\"M14 3v5h5M9 13h7M9 17h5\"/>", "truck": "<path d=\"M2 6h12v10H2zM14 10h4l3 3v3h-7z\"/><circle cx=\"6\" cy=\"18\" r=\"2\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/>", "box": "<path d=\"M3 8l9-5 9 5v8l-9 5-9-5z\"/><path d=\"M3 8l9 5 9-5M12 13v8\"/>", "scale": "<path d=\"M12 3v18M5 21h14M5 7h14\"/><path d=\"M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z\"/>", "more": "<circle cx=\"5\" cy=\"12\" r=\"1.3\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\"/><circle cx=\"19\" cy=\"12\" r=\"1.3\"/>"};
+const svg=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
+// label every table cell with its column header so rows can render as cards on phones
+function cardify(scope){scope.querySelectorAll('table').forEach(tb=>{tb.classList.add('rt');const hs=[...tb.querySelectorAll('thead th')].map(th=>th.textContent.trim());tb.querySelectorAll('tbody tr').forEach(tr=>{let i=0;[...tr.children].forEach(td=>{td.setAttribute('data-label',td.hasAttribute('colspan')?'':(hs[i]||''));i+=+(td.getAttribute('colspan')||1)})})})}
+function done(msg){save();closeModal();render();toast(msg)}
+let tt;function toast(m){const e=$('toast');e.textContent=m;e.hidden=false;clearTimeout(tt);tt=setTimeout(()=>e.hidden=true,2600)}
+function render(){
+  const route=(location.hash.slice(1)||'dashboard');
+  const C=compute();
+  const transit=S.trips.filter(t=>t.status==='in_transit').length;
+  const action=S.trips.filter(t=>t.status==='delivered'&&recon(t).excess>0).length;
+  $('nav').innerHTML=NAV.map(([k,l])=>k==='s'?`<div class="sec">${l}</div>`:`<a href="#${k}" class="${route===k?'on':''}">${l}${k==='trips'&&transit?`<span class="badge">${transit}</span>`:''}${k==='recon'&&action?`<span class="badge hot">${action}</span>`:''}</a>`).join('');
+  const V={dashboard:vDashboard,sales:c=>vOrders(c,'SO'),purchases:c=>vOrders(c,'PO'),trips:vTrips,stock:vStock,recon:vRecon,parties:vParties,audit:vAudit,reports:vReports}[route]||vDashboard;
+  const ae=document.activeElement&&document.activeElement.id;
+  $('main').innerHTML=`<div class="demo-strip"><b>Client demo</b><span>Sample data for illustration. Changes save in this browser only.</span><span>Rates ex-GST · weights in MT to 3 decimals (kg)</span></div>`+V(C);
+  cardify($('main'));
+  const TB=[['dashboard','Home','home'],['sales','Sales','doc'],['trips','Trucks','truck'],['stock','Stock','box'],['recon','Recon','scale']];
+  const inMore=['purchases','parties','audit','reports'].includes(route);
+  $('tabbar').innerHTML=TB.map(([k,l,i])=>`<a href="#${k}" class="${route===k?'on':''}">${svg(i)}${l}${k==='recon'&&action?`<span class="dot">${action}</span>`:''}${k==='trips'&&transit?`<span class="dot" style="background:var(--info)">${transit}</span>`:''}</a>`).join('')+`<button type="button" id="morebtn" class="${inMore?'on':''}">${svg('more')}More</button>`;
+  $('fab').hidden=!['dashboard','trips','sales','purchases','recon'].includes(route);
+  $('sheet').hidden=true;
+  if(ae==='tripq'){const e=$('tripq');e.focus();e.setSelectionRange(e.value.length,e.value.length)}
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-close]')||e.target.matches('[data-ov]')){closeModal();return}
+  const a=e.target.closest('[data-act]');if(!a)return;
+  const act=a.dataset.act,id=a.dataset.id,val=a.dataset.v;
+  const h={
+    period:()=>{UI.period=val},orderF:()=>{UI.orderF=val},tripdir:()=>{UI.tripF.dir=val},tripst:()=>{UI.tripF.status=val},recF:()=>{UI.recF=val},stock:()=>{UI.stockSel=val},
+    plate:()=>{e.preventDefault();UI.tripF={dir:'all',status:'all',q:fmtPlate(val)};if(location.hash!=='#trips'){location.hash='trips';return 'nav'}},
+  };
+  if(h[act]){if(h[act]()!=='nav'){saveUI();render()}else saveUI();return}
+  if(act==='order')return orderDetail(id);
+  if(act==='new-trip')return formTrip(id);
+  if(act==='receipt')return formReceipt(id);
+  if(act==='resolve')return formResolve(id);
+  if(act==='reopen')return formReopen(id);
+  if(act==='new-order')return formOrder(val);
+  if(act==='short-close')return formShortClose(id);
+  if(act==='new-party')return formParty();
+  if(act==='edit-party')return formParty(id);
+  if(act==='close-within'){const ts=S.trips.filter(t=>t.status==='delivered'&&!(recon(t).excess>0));ts.forEach(t=>{t.status='reconciled';t.resolution='within'});log('Bulk close',`${ts.length} trucks`,'Closed trucks with shortage within allowance');done(`${ts.length} trucks closed`);return}
+  if(act==='copy'){const el=$(val);const txt=el.textContent;const sel=()=>{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Selected — press Ctrl+C to copy')};
+    try{navigator.clipboard.writeText(txt).then(()=>toast('Copied'),sel)}catch(err){sel()}}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&root.innerHTML)closeModal();if((e.key==='Enter'||e.key===' ')&&e.target.matches('.card[data-act]')){e.preventDefault();e.target.click()}});
+document.addEventListener('input',e=>{if(e.target.id==='tripq'){UI.tripF.q=e.target.value;saveUI();render()}});
+document.addEventListener('change',e=>{if(e.target.id==='tally-sel'){UI.tallyT=e.target.value;render()}});
+const tip=$('tip');
+document.addEventListener('mousemove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(!t){tip.hidden=true;return}tip.textContent=t.getAttribute('data-tip');tip.hidden=false;const w=tip.offsetWidth;tip.style.left=Math.min(e.clientX+14,innerWidth-w-8)+'px';tip.style.top=(e.clientY+14)+'px'});
+$('role').value=UI.role;
+$('role').addEventListener('change',e=>{UI.role=e.target.value;saveUI();render();toast(UI.role==='owner'?'Owner view: rates, values and profit visible':'Clerk view: money hidden, order creation locked')});
+document.addEventListener('click',e=>{if(e.target.closest('#morebtn')){$('sheet').hidden=false;return}if(e.target.id==='sheet'||e.target.closest('.sheet-b a'))$('sheet').hidden=true});
+let resetArm2=false;
+$('reset2').addEventListener('click',e=>{if(!resetArm2){resetArm2=true;e.target.textContent='Tap again to reset';setTimeout(()=>{resetArm2=false;e.target.textContent='Reset demo data'},3000);return}
+  S=seed();save();resetArm2=false;e.target.textContent='Reset demo data';render();toast('Demo data reset')});
+let resetArm=false;
+$('reset').addEventListener('click',e=>{if(!resetArm){resetArm=true;e.target.textContent='Click again to reset';setTimeout(()=>{resetArm=false;e.target.textContent='Reset demo data'},3000);return}
+  S=seed();save();resetArm=false;e.target.textContent='Reset demo data';render();toast('Demo data reset')});
+addEventListener('hashchange',()=>{closeModal();render();scrollTo(0,0)});
+render();
+</script>
+
+</body>
+</html>
